@@ -10,6 +10,10 @@ This repository is the collaboration and reproducibility layer. It does **not** 
 - **Phase 2:** executable planner, executor, verifier, versioned handoffs, Skill registry, rollback stack, and evidence hashing.
 - **Phase 3:** closed-loop scenario, traces, knowledge consolidation, failure injection, reproducible evaluation, and packaging checks.
 
+## Design and progress plan
+
+The refined architecture, native Mission Control boundary, phased implementation plan, acceptance matrix, and next checkpoint are tracked in [`docs/design-and-plan.md`](docs/design-and-plan.md).
+
 ## Quick start
 
 ```bash

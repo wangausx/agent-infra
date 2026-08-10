@@ -1,0 +1,8 @@
+name: rollback-action
+version: 0.1.0
+purpose: Restore pre-action state or execute a compensating action after failed verification.
+permissions:
+  - tool:allowlisted-only
+  - approval:required-for-production
+idempotency: required
+verification: independent-verifier-required

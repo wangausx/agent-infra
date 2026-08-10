@@ -1,0 +1,10 @@
+contract:
+  name: mission-control-http-api
+  compatibility_version: 0.1.0
+  target_base_url: http://127.0.0.1:3005
+  source_project: /srv/agent-platform/mission-control/repo
+  source_git_mirror: /home/jinwang/dgx-infra
+  policy: consume-api-contract-do-not-copy-implementation
+  production_writes_default: false
+  isolated_test_port: 3015
+  isolated_data_dir: ./.runtime/mission-control-data

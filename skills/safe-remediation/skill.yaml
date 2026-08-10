@@ -1,0 +1,10 @@
+name: safe-remediation
+version: 0.1.0
+purpose: Execute an allowlisted low-risk action with dry-run and approval enforcement.
+permissions:
+  - tool:allowlisted-only
+  - production_mutation: denied-by-default
+failure_handling:
+  - preserve-preaction-state
+  - emit-rollback-plan
+verification: independent-verifier-required

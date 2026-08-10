@@ -1,0 +1,32 @@
+# Python / Node environments
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Runtime state and generated outputs
+.runtime/
+state/runtime/
+runs/
+artifacts/generated/
+logs/*.jsonl
+logs/*.log
+coverage.xml
+htmlcov/
+dist/
+build/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/

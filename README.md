@@ -4,27 +4,11 @@ Competition adaptation for **Multi-Agent Autonomous Collaboration for complex ta
 
 This repository is the collaboration and reproducibility layer. It does **not** copy or fork Mission Control implementation files.
 
-## Boundary
+## Implemented phases
 
-- **Mission Control** remains the external durable control plane: task lifecycle, leases, dependencies, evidence, verification, approval gates, audit, and UI.
-- **Agent Infra** owns AgentTeams-style orchestration, agent roles, context handoffs, Skills, tool/MCP adapters, scenarios, evaluation, traces, and packaging.
-
-Integration target: `MISSION_CONTROL_BASE_URL` (default `http://127.0.0.1:3005`). Production writes are not the default: use `MISSION_CONTROL_MODE=isolated` and `DRY_RUN=true`.
-
-## Repository map
-
-```text
-agents/       executable role boundaries: planner, executor, verifier
-skills/       versioned reusable Skill manifests
-adapters/     external integrations, including Mission Control API client
-contracts/    API schemas, fixtures, and compatibility manifest
-tools/        MCP/equivalent tool contracts and adapters
-scenarios/    reproducible closed-loop competition scenarios
-evals/        acceptance checks, fault injection, and scoring
-deploy/       isolated demo and local runtime configuration
-docs/         architecture, operations, disclosure, and plans
-scripts/      deterministic setup/check/demo/reset helpers
-```
+- **Phase 1:** standalone repository, compatibility contract, HTTP adapter, isolated config.
+- **Phase 2:** executable planner, executor, verifier, versioned handoffs, Skill registry, rollback stack, and evidence hashing.
+- **Phase 3:** closed-loop scenario, traces, knowledge consolidation, failure injection, reproducible evaluation, and packaging checks.
 
 ## Quick start
 
@@ -32,13 +16,34 @@ scripts/      deterministic setup/check/demo/reset helpers
 cp .env.example .env
 npm run check
 npm test
+npm run evaluate
 npm run demo
+npm run package:check
 ```
 
-The initial demo is intentionally a dry-run structure check. It must not mutate production Mission Control data.
+The demo is deterministic, in-memory, isolated, and dry-run. It does not mutate production Mission Control.
 
-## Non-goals
+## Boundary
 
-- No Mission Control source copy or submodule.
-- No direct writes to production task data by default.
-- No high-risk remediation without an explicit approval boundary.
+- **Mission Control** remains the external durable control plane: task lifecycle, leases, dependencies, evidence, verification, approval gates, audit, and UI.
+- **Agent Infra** owns AgentTeams-style orchestration, agent roles, context handoffs, Skills, tool/MCP adapters, scenarios, evaluation, traces, and packaging.
+
+## Repository map
+
+```text
+src/          executable collaboration runtime and API client
+agents/       role boundary documentation
+skills/       versioned reusable Skill manifests
+adapters/     external integration boundary documentation
+contracts/    API compatibility, schemas, and fixtures
+tools/        MCP/equivalent tool contract documentation
+scenarios/    reproducible scenario documentation
+evals/        runtime tests and fault-injection checks
+deploy/       isolated demo configuration
+docs/         architecture, operations, disclosure, and plans
+scripts/      deterministic setup/check/demo/evaluation helpers
+```
+
+## Safety
+
+No production writes by default. High-risk Skills require approval when not in dry-run. Mission Control source and data are outside this repository and are not modified by the demo or tests.

@@ -1,0 +1,10 @@
+tool:
+  name: inspect-system
+  version: 1.0.0
+  side_effect: false
+  requires_approval: false
+  input: {type: object}
+  output: {type: object}
+policy:
+  arbitrary_shell: false
+  dry_run_default: true

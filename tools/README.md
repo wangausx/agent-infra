@@ -1,3 +1,13 @@
-# Tools / MCP-equivalent contract
+# Tool/MCP contract
 
-Tool definitions will be explicit, schema-validated, permissioned, auditable, and independently verifiable. Production-affecting tools require dry-run and approval handling.
+Tools are registered by name and version. Each tool declares whether it has side effects and whether approval is required. The runtime invokes tools through `src/tool-registry.mjs`; it does not execute arbitrary shell commands.
+
+Required tool metadata:
+
+- `name`: stable identifier
+- `version`: compatibility version
+- `sideEffect`: boolean
+- `requiresApproval`: boolean
+- `input`/`output`: JSON-serializable contract
+
+The default tool policy is dry-run plus approval for side effects.

@@ -1,0 +1,11 @@
+# Closed-loop contract fixture
+compatibility_version: 0.1.0
+task: demo-task
+evidence:
+  required_fields: [task_id, action, result, dry_run, approved, evidence_id, hash]
+verification:
+  independent: true
+  accepted_verdicts: [PASS, FAIL]
+safety:
+  default_dry_run: true
+  default_require_approval: true

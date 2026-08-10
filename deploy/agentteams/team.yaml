@@ -1,0 +1,33 @@
+apiVersion: agentteams.agentscope.ai/v1alpha1
+kind: Team
+metadata:
+  name: agent-infra-collaboration
+  labels:
+    project: agent-infra
+    environment: isolated
+spec:
+  manager:
+    name: planner
+    runtime: openclaw
+    role: planner
+  workers:
+    - name: executor
+      runtime: hermes
+      role: executor
+      skills:
+        - safe-remediation
+        - rollback-action
+    - name: verifier
+      runtime: hermes
+      role: verifier
+      skills:
+        - evidence-bundle
+  room:
+    human_intervention: true
+    visible_handoffs: true
+    shared_filesystem: false
+  policy:
+    dry_run: true
+    production_writes: false
+    mission_control_base_url: http://127.0.0.1:3015
+    mission_control_mode: isolated

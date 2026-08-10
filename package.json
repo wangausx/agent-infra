@@ -1,6 +1,6 @@
 {
   "name": "agent-infra",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "AgentTeams collaboration runtime and competition harness built on Mission Control APIs",
   "type": "module",
@@ -9,6 +9,7 @@
     "demo": "node scripts/demo.mjs",
     "evaluate": "node scripts/evaluate.mjs",
     "integration": "node scripts/integration.mjs",
+    "agentteams:integration": "node scripts/agentteams-integration.mjs",
     "package:check": "node scripts/package-check.mjs",
     "test": "node --test"
   },

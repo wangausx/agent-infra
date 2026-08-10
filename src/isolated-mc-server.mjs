@@ -9,8 +9,33 @@ export function createIsolatedMissionControlServer({ port = 0, leaseClock = () =
     try {
       const url = new URL(req.url, 'http://127.0.0.1'); const parts = url.pathname.split('/').filter(Boolean);
       if (req.method === 'GET' && url.pathname === '/api/tasks') return json(res, 200, { tasks: [...tasks.values()] });
-      if (req.method === 'POST' && url.pathname === '/api/tasks') { const task = await readBody(req); if (!task.id) return json(res, 400, { error: 'task id required' }); tasks.set(task.id, { ...task }); return json(res, 201, tasks.get(task.id)); }
-      if (parts[0] !== 'api' || parts[1] !== 'tasks' || !parts[2]) return req.method === 'POST' && url.pathname === '/api/events' ? (events.push(await readBody(req)), json(res, 201, { accepted: true })) : json(res, 404, { error: 'not found' });
+      if (req.method === 'POST' && url.pathname === '/api/tasks') {
+        const body = await readBody(req); const id = body.id ?? `task-${crypto.randomUUID()}`;
+        const task = { ...body, id, createdAt: new Date(leaseClock()).toISOString() }; delete task.idempotency_key;
+        tasks.set(id, task); return json(res, 201, { task });
+      }
+      if (req.method === 'POST' && url.pathname === '/api/events') { const event = await readBody(req); events.push(event); return json(res, 201, { event }); }
+      if (req.method === 'POST' && url.pathname === '/api/tasks/heartbeat') {
+        const body = await readBody(req); const task = tasks.get(body.taskId);
+        if (!task) return json(res, 404, { error: 'Not found' });
+        if (task.claimId !== body.claimId || task.claimGeneration !== body.claimGeneration) return json(res, 409, { error: 'Stale claim rejected' });
+        Object.assign(task, { lastHeartbeatAt: new Date(leaseClock()).toISOString(), leaseExpiresAt: leaseClock() + 3600000, workerPid: body.workerPid, workerCommand: body.workerCommand });
+        return json(res, 200, { task });
+      }
+      if (req.method === 'POST' && url.pathname === '/api/tasks/recover-expired') {
+        const body = await readBody(req); const task = tasks.get(body.taskId);
+        if (!task) return json(res, 404, { error: 'TASK_NOT_FOUND' });
+        if (task.leaseExpiresAt > leaseClock()) return json(res, 409, { error: 'LEASE_ACTIVE' });
+        task.status = 'backlog'; delete task.claimId; return json(res, 200, { ok: true, task });
+      }
+      if (req.method === 'PATCH' && url.pathname === '/api/tasks') {
+        const id = url.searchParams.get('id'); const task = tasks.get(id); if (!task) return json(res, 404, { error: 'Not found' });
+        const body = await readBody(req);
+        if (body.status === 'in-progress') { task.status = body.status; task.claimId = crypto.randomUUID(); task.claimGeneration = (task.claimGeneration ?? 0) + 1; task.leaseOwner = body.actor; task.leaseExpiresAt = leaseClock() + 3600000; }
+        else { Object.assign(task, body); }
+        return json(res, 200, { task });
+      }
+      if (parts[0] !== 'api' || parts[1] !== 'tasks' || !parts[2]) return json(res, 404, { error: 'not found' });
       const id = decodeURIComponent(parts[2]); const task = tasks.get(id);
       if (req.method === 'GET' && parts.length === 3) return task ? json(res, 200, task) : json(res, 404, { error: 'task not found' });
       if (req.method === 'POST' && parts[3] === 'claim') {

@@ -35,6 +35,44 @@ export class InMemoryRoomTransport {
   list() { return [...this.messages]; }
 }
 
+export class HttpRoomTransport {
+  constructor({ baseUrl, roomId, accessToken = '', timeoutMs = 5000, dryRun = true, allowExternal = false } = {}) {
+    if (!baseUrl || !roomId) throw new TypeError('baseUrl and roomId are required');
+    const url = new URL(baseUrl);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') throw new TypeError('AgentTeams transport URL must use HTTP(S)');
+    if (!dryRun && !allowExternal) throw new Error('external AgentTeams writes require explicit allowExternal=true');
+    this.baseUrl = url.toString().replace(/\/$/, '');
+    this.roomId = roomId;
+    this.accessToken = accessToken;
+    this.timeoutMs = timeoutMs;
+    this.dryRun = dryRun;
+    this.allowExternal = allowExternal;
+  }
+
+  async send(message) {
+    validateAgentTeamsEnvelope(message);
+    if (this.dryRun) return { dry_run: true, message };
+    const endpoint = `${this.baseUrl}/_matrix/client/v3/rooms/${encodeURIComponent(this.roomId)}/send/m.room.message/${encodeURIComponent(message.message_id)}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    try {
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: {
+          'content-type': 'application/json',
+          ...(this.accessToken ? { authorization: `Bearer ${this.accessToken}` } : {})
+        },
+        body: JSON.stringify({ msgtype: message.body.msgtype, body: JSON.stringify(message), format: message.body.format }),
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error(`AgentTeams room transport HTTP ${response.status}`);
+      return { external: true, status: response.status, body: await response.json().catch(() => ({})), message };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+}
+
 export class AgentTeamsAdapter {
   constructor({ transport, roomId = 'agent-infra-isolated', dryRun = true, allowExternal = false, team = AGENTTEAMS_TEAM } = {}) {
     if (!transport || typeof transport.send !== 'function') throw new TypeError('AgentTeams transport.send is required');

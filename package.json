@@ -10,6 +10,8 @@
     "evaluate": "node scripts/evaluate.mjs",
     "integration": "node scripts/integration.mjs",
     "agentteams:integration": "node scripts/agentteams-integration.mjs",
+    "agentteams:live": "node scripts/agentteams-live-integration.mjs",
+    "live:mc": "node scripts/live-mc-e2e.mjs",
     "package:check": "node scripts/package-check.mjs",
     "test": "node --test"
   },

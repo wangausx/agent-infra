@@ -36,7 +36,7 @@ export class InMemoryRoomTransport {
 }
 
 export class HttpRoomTransport {
-  constructor({ baseUrl, roomId, accessToken = '', timeoutMs = 5000, dryRun = true, allowExternal = false } = {}) {
+  constructor({ baseUrl, roomId, accessToken = '', timeoutMs = 5000, dryRun = true, allowExternal = false, mentionUserId = '' } = {}) {
     if (!baseUrl || !roomId) throw new TypeError('baseUrl and roomId are required');
     const url = new URL(baseUrl);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') throw new TypeError('AgentTeams transport URL must use HTTP(S)');
@@ -47,6 +47,7 @@ export class HttpRoomTransport {
     this.timeoutMs = timeoutMs;
     this.dryRun = dryRun;
     this.allowExternal = allowExternal;
+    this.mentionUserId = mentionUserId;
   }
 
   async send(message) {
@@ -62,7 +63,12 @@ export class HttpRoomTransport {
           'content-type': 'application/json',
           ...(this.accessToken ? { authorization: `Bearer ${this.accessToken}` } : {})
         },
-        body: JSON.stringify({ msgtype: message.body.msgtype, body: JSON.stringify(message), format: message.body.format }),
+        body: JSON.stringify({
+          msgtype: message.body.msgtype,
+          body: this.mentionUserId ? `${this.mentionUserId} ${JSON.stringify(message)}` : JSON.stringify(message),
+          format: message.body.format,
+          ...(this.mentionUserId ? { 'm.mentions': { user_ids: [this.mentionUserId] } } : {})
+        }),
         signal: controller.signal
       });
       if (!response.ok) throw new Error(`AgentTeams room transport HTTP ${response.status}`);

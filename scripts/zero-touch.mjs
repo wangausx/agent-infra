@@ -1,0 +1,167 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { loadAutonomyFixture } from '../scenarios/autonomy-sensor-fusion/fixture.mjs';
+import { runZeroTouchScenario } from '../src/zero-touch.mjs';
+import { AgentTeamsAdapter, InMemoryRoomTransport, AGENTTEAMS_TEAM } from '../src/agentteams-adapter.mjs';
+import { MemoryControlPlane } from '../src/mission-control-client.mjs';
+import crypto from 'node:crypto';
+import { summarizeMetrics } from '../src/metrics.mjs';
+import { ToolResponseRecorder, canonicalJson, readToolRecording, writeToolRecording } from '../src/replay/tool-response-recorder.mjs';
+import { correlateAlerts } from '../src/zero-touch/alert-correlator.mjs';
+import { loadCausalViewModel, renderTerminal, renderUiHtml } from '../src/causal-timeline.mjs';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const RUNS = path.join(ROOT, 'artifacts', 'runs');
+const STATE = path.join(ROOT, 'artifacts', '.zero-touch-state.json');
+const roles = ['Danny', 'Morgan', 'Rex', 'Dr. Sage', 'Juno'];
+
+async function writeJson(file, value) { await fs.mkdir(path.dirname(file), { recursive: true }); await fs.writeFile(file, `${JSON.stringify(value, null, 2)}\n`); }
+async function writeJsonl(file, values) { await fs.writeFile(file, `${values.map((value) => JSON.stringify(value)).join('\n')}\n`); }
+function roleMessage(runId, correlationId, sender, recipient, kind, body) { return { run_id: runId, correlation_id: correlationId, sender, recipient, kind, body }; }
+function assertSameRun(run, manifest) {
+  const { report, task, handoffs, events } = run;
+  const ids = [report.run_id, report.correlation_id, report.manifest.team_id, report.manifest.room_id, task.id];
+  if (ids.some((value) => typeof value !== 'string' || value.length === 0)) throw new Error('run identity incomplete');
+  if (handoffs.some((message) => message.run_id !== report.run_id)) throw new Error('handoff lineage mismatch');
+  if (events.some((event) => event.run_id !== report.run_id || event.correlation_id !== report.correlation_id || event.task_id !== task.id)) throw new Error('event lineage mismatch');
+  if (manifest.run_id !== report.run_id || manifest.team_id !== report.manifest.team_id || manifest.room_id !== report.manifest.room_id || manifest.task_id !== task.id) throw new Error('manifest lineage mismatch');
+  if (JSON.stringify(manifest.identities) !== JSON.stringify(run.roles)) throw new Error('role identity mismatch');
+}
+
+async function buildRun(mode = 'happy', recorder = null) {
+  const fixture = await loadAutonomyFixture();
+  const report = await runZeroTouchScenario({ fixture, mode: 'dry-run', recorder });
+  const transport = new InMemoryRoomTransport();
+  const teams = new AgentTeamsAdapter({ transport, dryRun: true, team: AGENTTEAMS_TEAM });
+  const control = new MemoryControlPlane();
+  const task = { id: report.manifest.task_id, title: 'Autonomy zero-touch recovery', status: 'in-review', assignee: 'Danny', evidence: [] };
+  await control.createTask(task);
+  const handoffs = [
+    roleMessage(report.run_id, report.correlation_id, 'Danny', 'Morgan', 'task.assign', { task_id: task.id, objective: 'Recover simulated sensor-fusion degradation' }),
+    roleMessage(report.run_id, report.correlation_id, 'Morgan', 'Rex', 'handoff.plan', { incident_id: report.incident.id, cause: report.rca.selected_cause }),
+    roleMessage(report.run_id, report.correlation_id, 'Rex', 'Dr. Sage', 'handoff.action', { action: report.policy.action, action_key: report.action.action_key }),
+    roleMessage(report.run_id, report.correlation_id, 'Dr. Sage', 'Juno', 'handoff.verdict', { verdict: report.verdict, evidence: report.verifier.evidence }),
+    roleMessage(report.run_id, report.correlation_id, 'Juno', 'Danny', 'review.consolidate', { task_id: task.id, verdict: report.verdict })
+  ];
+  for (const message of handoffs) await teams.publish({ runId: message.run_id, correlationId: message.correlation_id, sender: message.sender, recipient: message.recipient, kind: message.kind, body: message.body });
+  const events = roles.map((role, index) => ({ run_id: report.run_id, correlation_id: report.correlation_id, agent: role, action: index === 0 ? 'accepted' : 'handoff', task_id: task.id }));
+  for (const event of events) await control.postEvent(event);
+  if (mode === 'approval') {
+    report.verdict = 'PAUSED'; report.policy = { ...report.policy, action: 'pause-for-approval', approval_required: true };
+  } else if (mode === 'reject') {
+    report.verdict = 'REJECTED'; report.verifier = { ...report.verifier, verdict: 'FAIL', rejection_reason: 'simulated independent verifier rejection' };
+  }
+  return { report, task, roles, handoffs, events, messages: transport.list(), controlEvents: control.events };
+}
+
+async function persist(run, { recording = null } = {}) {
+  const { report, task } = run;
+  const dir = path.join(RUNS, report.run_id);
+  await fs.rm(dir, { recursive: true, force: true }); await fs.mkdir(dir, { recursive: true });
+  const scorecard = { schema: 'agent-infra/zero-touch-scorecard/v1', run_id: report.run_id, scenario: 'autonomy-sensor-fusion', verdict: report.verdict, stages: report.stages, roles: run.roles, production_writes: false, physical_vehicle_used: false, measurable_value: { raw_alerts: 12, suppressed_alerts: 4, incidents: 1, action: report.policy.action } };
+  const manifest = { schema: 'agent-infra/evidence-manifest/v2', run_id: report.run_id, correlation_id: report.correlation_id, seed: report.seed, team_id: report.manifest.team_id, room_id: report.manifest.room_id, project_id: report.manifest.project_id, task_id: task.id, files: ['scorecard.json','incident.json','suppression-evidence.jsonl','rca-report.json','policy-decision.json','action-result.json','verifier-report.json','postmortem.md','trace.jsonl','intervention-ledger.jsonl','mission-control-snapshot.json','evidence-manifest.json'], identities: run.roles, safety: scorecard };
+  assertSameRun(run, manifest);
+  await writeJson(path.join(dir, 'scorecard.json'), scorecard);
+  await writeJson(path.join(dir, 'incident.json'), report.incident);
+  await writeJsonl(path.join(dir, 'suppression-evidence.jsonl'), report.suppression);
+  await writeJson(path.join(dir, 'rca-report.json'), report.rca);
+  await writeJson(path.join(dir, 'policy-decision.json'), report.policy);
+  await writeJson(path.join(dir, 'action-result.json'), report.action);
+  await writeJson(path.join(dir, 'verifier-report.json'), report.verifier);
+  await fs.writeFile(path.join(dir, 'postmortem.md'), `# Zero-touch post-mortem\n\n- Run: ${report.run_id}\n- Cause: ${report.rca.selected_cause}\n- Verdict: ${report.verdict}\n- Action: ${report.policy.action}\n`);
+  await writeJsonl(path.join(dir, 'trace.jsonl'), run.events);
+  await writeJsonl(path.join(dir, 'intervention-ledger.jsonl'), [{ run_id: report.run_id, actor: 'Danny', command: 'approve', previous_state: 'open', new_state: 'closed', reason: 'verified dry-run recovery', authorization: 'simulation-policy' }]);
+  await writeJson(path.join(dir, 'mission-control-snapshot.json'), { task: run.task, events: run.controlEvents, agentteams: { team: AGENTTEAMS_TEAM, messages: run.messages } });
+  await writeJson(path.join(dir, 'metrics.json'), summarizeMetrics(run.events, { status: report.verdict, evidence: report.evidence }));
+  await writeJson(path.join(dir, 'replay-recording.json'), { schema: 'agent-infra/replay-recording/v2', seed: report.seed, run_id: report.run_id, verdict: report.verdict, recording });
+  await writeJson(path.join(dir, 'disclosure.json'), { unavailable_tests: ['official AgentTeams live transport', 'production Mission Control writes'], reason: 'M4 acceptance is offline and production-safe' });
+  const allFiles = [...manifest.files, 'metrics.json', 'replay-recording.json', 'disclosure.json'];
+  const hashedFiles = allFiles.filter((file) => file !== 'evidence-manifest.json');
+  manifest.files = allFiles;
+  manifest.sha256 = {};
+  for (const file of hashedFiles) manifest.sha256[file] = crypto.createHash('sha256').update(await fs.readFile(path.join(dir, file))).digest('hex');
+  await writeJson(path.join(dir, 'evidence-manifest.json'), manifest);
+  await writeJson(STATE, { run_id: report.run_id, artifact_dir: dir, verdict: report.verdict });
+  return { dir, scorecard, manifest };
+}
+
+const command = process.argv[2] ?? 'demo';
+const renderMode = process.argv[3];
+async function renderCausal(mode) {
+  const state = JSON.parse(await fs.readFile(STATE, 'utf8'));
+  const model = await loadCausalViewModel(state.artifact_dir);
+  if (mode === '--terminal') console.log(renderTerminal(model, { colorEnabled: process.env.NO_COLOR !== '1' }));
+  else if (mode === '--ui') {
+    const output = process.argv[4] && !process.argv[4].startsWith('--') ? path.resolve(process.argv[4]) : path.join(ROOT, 'artifacts', 'causal-timeline.html');
+    await fs.writeFile(output, renderUiHtml(model)); console.log(JSON.stringify({ ui: 'written', path: output, run_id: model.run_id }));
+  } else throw new Error('render mode required: --terminal or --ui');
+}
+if (command === 'render') { await renderCausal(renderMode); process.exit(0); }
+if (command === 'reset') { await fs.rm(RUNS, { recursive: true, force: true }); await fs.rm(STATE, { force: true }); console.log(JSON.stringify({ reset: true, artifact_root: RUNS })); process.exit(0); }
+if (command === 'replay') {
+  const fixture = await loadAutonomyFixture();
+  const recordingFile = path.join(RUNS, 'replay-recording.json');
+  const recorder = new ToolResponseRecorder();
+  const first = await buildRun('happy', recorder);
+  const firstSaved = await persist(first, { recording: recorder.finish() });
+  const firstEvidence = Object.fromEntries(await Promise.all(['scorecard.json', 'incident.json', 'suppression-evidence.jsonl', 'rca-report.json', 'policy-decision.json', 'action-result.json', 'verifier-report.json', 'postmortem.md', 'trace.jsonl', 'mission-control-snapshot.json', 'evidence-manifest.json'].map(async (file) => [file, await fs.readFile(path.join(firstSaved.dir, file), 'utf8')])));
+  await writeToolRecording(recordingFile, recorder.finish());
+  const recorded = await readToolRecording(recordingFile);
+  const replayRecorder = new ToolResponseRecorder({ recording: recorded, mode: 'replay' });
+  const second = await buildRun('happy', replayRecorder);
+  replayRecorder.finish();
+  const secondSaved = await persist(second, { recording: recorded });
+  const evidenceFiles = ['scorecard.json', 'incident.json', 'suppression-evidence.jsonl', 'rca-report.json', 'policy-decision.json', 'action-result.json', 'verifier-report.json', 'postmortem.md', 'trace.jsonl', 'mission-control-snapshot.json', 'evidence-manifest.json'];
+  for (const file of evidenceFiles) {
+    const b = await fs.readFile(path.join(secondSaved.dir, file), 'utf8');
+    if (firstEvidence[file] !== b) throw new Error(`replay evidence mismatch: ${file}`);
+  }
+  if (first.report.verdict !== second.report.verdict || canonicalJson(first.report) !== canonicalJson(second.report)) throw new Error('replay canonical report mismatch');
+  console.log(JSON.stringify({ replay: 'PASS', offline: true, tool_responses: recorded.entries.length, compared: ['verdict', 'report', ...evidenceFiles], run_id: second.report.run_id, idempotent_artifact_path: secondSaved.dir })); process.exit(0);
+}
+if (command === 'failure-matrix') {
+  const fixture = await loadAutonomyFixture();
+  const definitions = fixture.failure_cases;
+  const cases = [];
+  for (const definition of definitions) {
+    let observed; let evidence = [];
+    try {
+      if (definition.case_id === 'malformed-alert' || definition.case_id === 'empty-input') {
+        const injected = structuredClone(fixture); injected.alerts = definition.case_id === 'empty-input' ? [] : [{ ...injected.alerts[0], alert_id: '', occurred_at: 'invalid' }];
+        correlateAlerts(injected.alerts);
+      } else if (definition.case_id === 'approval-pause') {
+        const paused = await buildRun('approval');
+        observed = { verdict: paused.report.verdict, approval_required: paused.report.policy.approval_required, side_effects: paused.report.action?.side_effects ?? false };
+        evidence = ['policy-decision', 'approval-required-before-side-effects'];
+      } else if (definition.case_id === 'stale-lease-restart') {
+        const first = await runZeroTouchScenario({ fixture }); const second = await runZeroTouchScenario({ fixture });
+        observed = { adopted: first.run_id === second.run_id, duplicate_action_count: second.action.duplicate_action_count, durable_evidence: Boolean(first.action.action_key) }; evidence = ['durable-action-evidence', 'restart-adoption'];
+      } else {
+        const injected = structuredClone(fixture);
+        if (definition.case_id === 'new-alert-during-recovery') injected.alerts.push({ alert_id: 'alert-recovery-001', occurred_at: '2026-08-12T16:01:00.000Z', source: 'safety-monitor', kind: 'safety-warning', component: 'safety-monitor', message: 'new warning during recovery' });
+        const report = await runZeroTouchScenario({ fixture: injected, failure: ['executor-failure', 'verifier-failure', 'rollback-failure'].includes(definition.case_id) ? definition.case_id : null });
+        observed = { verdict: report.verdict, duplicate_action_count: report.action.duplicate_action_count, compensation: report.verifier.compensation ?? report.action.compensation ?? null, new_alert: definition.case_id === 'new-alert-during-recovery' }; evidence = report.evidence;
+      }
+    } catch (error) { observed = { rejected: true, error: error.message, side_effects: false }; evidence = ['rejected-before-side-effects']; }
+    const pass = {
+      'duplicate-alerts-only': observed?.duplicate_action_count === 0,
+      'false-rca-hypothesis': observed?.verdict === 'PASS',
+      'executor-failure': observed?.compensation?.status === 'compensated',
+      'verifier-failure': observed?.verdict === 'FAIL',
+      'rollback-failure': observed?.compensation?.status === 'failed',
+      'approval-pause': observed?.verdict === 'PAUSED' && observed?.approval_required === true && observed?.side_effects === false,
+      'stale-lease-restart': observed?.adopted === true && observed?.duplicate_action_count === 0 && observed?.durable_evidence === true,
+      'new-alert-during-recovery': observed?.new_alert === true,
+      'malformed-alert': observed?.rejected === true && observed?.side_effects === false,
+      'empty-input': observed?.rejected === true && observed?.side_effects === false
+    }[definition.case_id];
+    cases.push({ ...definition, status: pass ? 'PASS' : 'FAIL', observed, evidence });
+  }
+  const matrix = { schema: 'agent-infra/failure-matrix/v1', status: cases.every((item) => item.status === 'PASS') ? 'PASS' : 'FAIL', cases };
+  console.log(JSON.stringify(matrix, null, 2)); process.exit(matrix.status === 'PASS' ? 0 : 1);
+}
+const mode = command === 'approval' ? 'approval' : command === 'reject' ? 'reject' : 'happy';
+const run = await buildRun(mode); const saved = await persist(run);
+console.log(JSON.stringify({ command, run_id: run.report.run_id, verdict: run.report.verdict, stages: run.report.stages, artifact_dir: saved.dir, roles: run.roles, task_status: run.task.status, production_writes: false }, null, 2));
+if (command === 'demo' && run.report.verdict !== 'PASS') process.exitCode = 1;

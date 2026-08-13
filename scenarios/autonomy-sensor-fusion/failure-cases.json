@@ -1,0 +1,62 @@
+[
+  {
+    "case_id": "duplicate-alerts-only",
+    "category": "duplicate-retry",
+    "injection": "repeat duplicate-marked alerts without a new causal event",
+    "expected_outcome": "one incident and no duplicate remediation"
+  },
+  {
+    "case_id": "false-rca-hypothesis",
+    "category": "verifier-disagreement",
+    "injection": "prefer global localization failure despite healthy GPS and map match",
+    "expected_outcome": "disconfirming evidence rejects the hypothesis"
+  },
+  {
+    "case_id": "executor-failure",
+    "category": "tool-failure",
+    "injection": "fail the allowlisted action after recording before-state",
+    "expected_outcome": "isolated state is compensated and evidence retained"
+  },
+  {
+    "case_id": "verifier-failure",
+    "category": "timeout",
+    "injection": "leave fusion confidence below recovery threshold",
+    "expected_outcome": "run is rejected and never reported recovered"
+  },
+  {
+    "case_id": "rollback-failure",
+    "category": "rollback-failure",
+    "injection": "fail restoration after rejected verification",
+    "expected_outcome": "failed-compensation evidence is explicit"
+  },
+  {
+    "case_id": "approval-pause",
+    "category": "rejected-approval",
+    "injection": "select high-risk deployment rollback",
+    "expected_outcome": "action pauses before side effects pending approval"
+  },
+  {
+    "case_id": "stale-lease-restart",
+    "category": "restart-adoption",
+    "injection": "restart after durable action evidence exists",
+    "expected_outcome": "completed work is adopted without duplicate action"
+  },
+  {
+    "case_id": "new-alert-during-recovery",
+    "category": "dependency-blockage",
+    "injection": "emit a safety warning during the observation window",
+    "expected_outcome": "incident remains open or is re-planned"
+  },
+  {
+    "case_id": "malformed-alert",
+    "category": "stale-claim",
+    "injection": "remove alert_id and use an invalid timestamp",
+    "expected_outcome": "input is rejected before side effects"
+  },
+  {
+    "case_id": "empty-input",
+    "category": "reassignment",
+    "injection": "provide no alerts",
+    "expected_outcome": "no actionable incident is recorded with zero side effects"
+  }
+]

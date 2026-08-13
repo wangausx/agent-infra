@@ -1,0 +1,33 @@
+{
+  "schema": "agent-infra/autonomy-expected-report/v1",
+  "seed": "autonomy-sensor-fusion-001",
+  "raw_alert_count": 12,
+  "expected_incident_count": 1,
+  "expected_suppressed_alert_ids": ["alert-007", "alert-008", "alert-009", "alert-010"],
+  "expected_selected_cause": "lidar-camera-timestamp-skew",
+  "expected_action": "resynchronize-sensor-timestamps",
+  "expected_verdict": "PASS",
+  "expected_final_state": {
+    "lidar_camera_offset_ms_max": 40,
+    "fusion_confidence_min": 0.82,
+    "position_covariance_m2_max": 0.2,
+    "tracking_confidence_min": 0.85,
+    "planner_mode": "nominal",
+    "inside_safety_corridor": true,
+    "duplicate_action_count": 0
+  },
+  "required_evidence": [
+    "incident",
+    "suppression-decisions",
+    "rca-hypotheses",
+    "policy-decision",
+    "before-state",
+    "after-state",
+    "verifier-report",
+    "postmortem",
+    "trace",
+    "manifest"
+  ],
+  "production_writes": false,
+  "physical_vehicle_used": false
+}

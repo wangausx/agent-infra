@@ -17,15 +17,19 @@ function requireNativeTask(task) {
 }
 
 export class MissionControlClient {
-  constructor({ baseUrl = process.env.MISSION_CONTROL_BASE_URL ?? 'http://127.0.0.1:3005', mode = process.env.MISSION_CONTROL_MODE ?? 'isolated', protocol = NATIVE_PROTOCOL, dryRun = process.env.DRY_RUN !== 'false', allowProductionWrites = false, authToken = process.env.MISSION_CONTROL_AUTH_TOKEN, apiVersion = '0.1.0', minRequestIntervalMs = 0, fetchImpl = fetch, clock = () => Date.now() } = {}) {
+  constructor({ baseUrl = process.env.MISSION_CONTROL_BASE_URL ?? 'http://192.168.1.140:3015', mode = process.env.MISSION_CONTROL_MODE ?? 'isolated', protocol = NATIVE_PROTOCOL, dryRun = process.env.DRY_RUN !== 'false', allowProductionWrites = false, authToken = process.env.MISSION_CONTROL_AUTH_TOKEN, apiVersion = '0.1.0', minRequestIntervalMs = 0, fetchImpl = fetch, clock = () => Date.now() } = {}) {
     this.baseUrl = baseUrl.replace(/\/$/, ''); this.mode = mode; this.protocol = protocol; this.dryRun = dryRun; this.allowProductionWrites = allowProductionWrites; this.authToken = authToken; this.apiVersion = apiVersion; this.minRequestIntervalMs = minRequestIntervalMs; this.fetch = fetchImpl; this.clock = clock; this.lastRequestAt = 0;
+  }
+  #assertTargetAllowed() {
+    const isProductionTarget = this.mode === 'production' || /:\s*3005(?:\/|$)/.test(this.baseUrl);
+    if (isProductionTarget && !this.allowProductionWrites) throw new Error('production Mission Control writes are blocked: agent-infra target is :3005; use isolated :3015 (or explicitly opt in)');
   }
   #assertWriteAllowed() {
     if (this.dryRun) return;
-    const isProductionTarget = this.mode === 'production' || /:\s*3005(?:\/|$)/.test(this.baseUrl);
-    if (isProductionTarget && !this.allowProductionWrites) throw new Error('production Mission Control writes require allowProductionWrites=true');
+    this.#assertTargetAllowed();
   }
   async request(path, { method = 'GET', body, headers = {} } = {}) {
+    this.#assertTargetAllowed();
     const elapsed = this.clock() - this.lastRequestAt;
     if (this.minRequestIntervalMs > elapsed) await new Promise((resolve) => setTimeout(resolve, this.minRequestIntervalMs - elapsed));
     const requestHeaders = { 'content-type': 'application/json', accept: `application/json; mc-api-version=${this.apiVersion}`, 'x-mc-api-version': this.apiVersion, ...headers };

@@ -1,0 +1,16 @@
+{
+  "schema": "agent-infra/team-template/v1",
+  "metadata": {"name": "trustops-autonomy", "version": "1.0.0"},
+  "spec": {
+    "roles": [
+      {"name":"Danny","role":"manager","runtime":"openclaw","skills":["intake"],"tools":["mission-control"]},
+      {"name":"Morgan","role":"team_leader","runtime":"openclaw","skills":["planning"],"tools":["task-graph"]},
+      {"name":"Rex","role":"executor","runtime":"hermes","skills":["safe-remediation"],"tools":["simulation"]},
+      {"name":"Dr. Sage","role":"verifier","runtime":"hermes","skills":["independent-verification"],"tools":["evidence-reader"]},
+      {"name":"Juno","role":"consolidator","runtime":"hermes","skills":["knowledge-consolidation"],"tools":["report-writer"]}
+    ],
+    "approval_policy": {"self_attestation": false, "interventions":["approve","reject","pause","resume","retry","reassign","cancel"]},
+    "dependency_rules": ["upstream_done_before_downstream"],
+    "failure_policy": ["rollback_on_verifier_failure", "fence_stale_claim"]
+  }
+}

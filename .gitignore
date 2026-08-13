@@ -26,7 +26,26 @@ htmlcov/
 dist/
 build/
 
+# Temporary / obsolete artifacts
+artifacts/GOAI_*.pptx
+artifacts/*.html
+artifacts/evidence-test-*
+artifacts/packages/
+artifacts/.zero-touch-state.json
+artifacts/*.json
+artifacts/*.jsonl
+artifacts/trustops-solution-architecture*
+
+# State investigation / run logs
+state/m32-*.log
+state/agentteams-manager-*.md
+state/agent-infra-m3-1-*.md
+state/http-*.md
+state/ISOLATION-AUDIT.md
+state/causal-timeline*
+
 # OS/editor
 .DS_Store
 .idea/
 .vscode/
+

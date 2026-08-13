@@ -1,8 +1,12 @@
-# Agent Infra
+# TrustOps Automation
 
-Competition adaptation for **Multi-Agent Autonomous Collaboration for complex tasks**.
+**Multi-Agent Autonomous Collaboration for Complex Tasks**
 
-This repository is the collaboration and reproducibility layer. It does **not** copy or fork Mission Control implementation files.
+TrustOps Automation is a universal closed-loop operations fabric for multi-agent systems.
+
+The competition submission uses vehicle autonomy as the preliminary demonstration scenario, while the same contracts support later payments, infrastructure, and other operational scenarios.
+
+This repository is the collaboration, governance-adapter, scenario, and reproducibility layer. It does **not** copy or fork Mission Control implementation files. The repository identifier remains `agent-infra`; **TrustOps Automation** is the generic product/submission name.
 
 ## Implemented phases
 
@@ -27,6 +31,10 @@ npm run package:check
 
 The demo is deterministic, in-memory, isolated, and dry-run. It does not mutate production Mission Control.
 
+## Mission Control target
+
+Agent Infra task-board operations use the isolated board at `http://192.168.1.140:3015`. Set `MISSION_CONTROL_BASE_URL` to that endpoint. The production `:3005` instance is read-only reference data for this project and the client rejects it by default.
+
 ## Boundary
 
 - **Mission Control** remains the external durable control plane: task lifecycle, leases, dependencies, evidence, verification, approval gates, audit, and UI.
@@ -46,7 +54,15 @@ evals/        runtime tests and fault-injection checks
 deploy/       isolated demo configuration
 docs/         architecture, operations, disclosure, and plans
 scripts/      deterministic setup/check/demo/evaluation helpers
+artifacts/    generated scorecards, traces, evidence manifests, and replay bundles
 ```
+
+M5 package references:
+
+- [`docs/m5-package.md`](docs/m5-package.md): exact setup/demo/package reproduction.
+- [`docs/agent-identity-list.md`](docs/agent-identity-list.md): named role authorities and prohibitions.
+- [`docs/skill-checklist.md`](docs/skill-checklist.md): Skill permissions and failure modes.
+- [`docs/threat-model.md`](docs/threat-model.md): trust boundaries, mitigations, and residual risks.
 
 ## Safety
 

@@ -4,8 +4,8 @@ import { summarizeMetrics } from './metrics.mjs';
 import { RollbackStack } from './rollback.mjs';
 import { Trace } from './trace.mjs';
 
-export async function runClosedLoop({ taskId = `demo-${Date.now()}`, objective = 'Safely inspect and prepare a remediation', dryRun = true, approved = false, faults = {}, controlPlane = null, clock } = {}) {
-  const trace = new Trace({ clock }); const rollback = new RollbackStack();
+export async function runClosedLoop({ taskId = `demo-${Date.now()}`, runId = `run-${taskId}`, correlationId = `corr-${taskId}`, objective = 'Safely inspect and prepare a remediation', dryRun = true, approved = false, faults = {}, controlPlane = null, clock } = {}) {
+  const trace = new Trace({ clock, runId, correlationId }); const rollback = new RollbackStack();
   const result = { task_id: taskId, status: 'planned', dry_run: dryRun, approval_required: !approved, faults };
   try {
     const task = { id: taskId, title: objective, status: 'in-progress', evidence: [] };

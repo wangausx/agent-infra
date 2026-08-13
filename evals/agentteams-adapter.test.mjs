@@ -10,7 +10,7 @@ test('AgentTeams adapter starts an isolated manager-worker run', async () => {
   await adapter.startRun({ runId: 'run-agentteams-1', taskId: 'task-agentteams-1', objective: 'inspect isolated service' });
   const [message] = transport.list();
   assert.equal(message.protocol, AGENTTEAMS_PROTOCOL);
-  assert.equal(message.recipient, 'planner');
+  assert.equal(message.recipient, 'manager');
   assert.equal(message.dry_run, true);
   assert.equal(message.body.data.team, AGENTTEAMS_TEAM.metadata.name);
 });
@@ -18,7 +18,7 @@ test('AgentTeams adapter starts an isolated manager-worker run', async () => {
 test('AgentTeams adapter carries versioned planner-to-executor handoff', async () => {
   const transport = new InMemoryRoomTransport();
   const adapter = new AgentTeamsAdapter({ transport, dryRun: true });
-  const envelope = makeEnvelope({ taskId: 'task-agentteams-2', sender: 'planner', recipient: 'executor', kind: 'plan', payload: { steps: ['inspect', 'prepare'] } });
+  const envelope = makeEnvelope({ taskId: 'task-agentteams-2', runId: 'run-agentteams-2', correlationId: 'corr-agentteams-2', sender: 'planner', recipient: 'executor', kind: 'plan', payload: { steps: ['inspect', 'prepare'] } });
   await adapter.handoff({ runId: 'run-agentteams-2', envelope });
   const decoded = AgentTeamsAdapter.decode(transport.list()[0]);
   assert.equal(decoded.kind, 'handoff.plan');

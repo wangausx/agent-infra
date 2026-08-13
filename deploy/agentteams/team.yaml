@@ -7,26 +7,44 @@ metadata:
     environment: isolated
 spec:
   manager:
-    name: planner
+    name: Danny
     runtime: openclaw
-    role: planner
+    role: manager
+  team_leader:
+    name: Morgan
+    runtime: openclaw
+    role: team_leader
   workers:
-    - name: executor
+    - name: Rex
       runtime: hermes
       role: executor
       skills:
         - safe-remediation
         - rollback-action
-    - name: verifier
+    - name: Dr. Sage
       runtime: hermes
       role: verifier
+      skills:
+        - evidence-bundle
+    - name: Juno
+      runtime: hermes
+      role: consolidator
       skills:
         - evidence-bundle
   room:
     human_intervention: true
     visible_handoffs: true
+    intervention_commands:
+      - approve
+      - reject
+      - pause
+      - resume
+      - retry
+      - reassign
+      - cancel
     shared_filesystem: false
   policy:
+    self_attestation: false
     dry_run: true
     production_writes: false
     mission_control_base_url: http://127.0.0.1:3015

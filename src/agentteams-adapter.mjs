@@ -7,14 +7,17 @@ export const AGENTTEAMS_VERSION = 'v1.2.2';
 export const AGENTTEAMS_TEAM = Object.freeze({
   apiVersion: 'agentteams.agentscope.ai/v1alpha1',
   kind: 'Team',
-  metadata: { name: 'agent-infra-collaboration' },
+  metadata: { name: 'agent-infra-collaboration', project_id: 'agent-infra' },
   spec: {
-    manager: { runtime: 'openclaw', role: 'planner' },
+    manager: { name: 'Danny', runtime: 'openclaw', role: 'manager' },
+    team_leader: { name: 'Morgan', runtime: 'openclaw', role: 'team_leader' },
     workers: [
-      { name: 'executor', runtime: 'hermes', role: 'executor' },
-      { name: 'verifier', runtime: 'hermes', role: 'verifier' }
+      { name: 'Rex', runtime: 'hermes', role: 'executor' },
+      { name: 'Dr. Sage', runtime: 'hermes', role: 'verifier' },
+      { name: 'Juno', runtime: 'hermes', role: 'consolidator' }
     ],
-    room: { human_intervention: true, visible_handoffs: true }
+    room: { human_intervention: true, visible_handoffs: true, intervention_commands: ['approve', 'reject', 'pause', 'resume', 'retry', 'reassign', 'cancel'] },
+    policy: { self_attestation: false }
   }
 });
 
@@ -24,7 +27,7 @@ function id(prefix, value) {
 
 export function validateAgentTeamsEnvelope(message) {
   if (!message || message.protocol !== AGENTTEAMS_PROTOCOL) throw new TypeError('invalid AgentTeams protocol');
-  if (!message.run_id || !message.room_id || !message.sender || !message.recipient) throw new TypeError('missing AgentTeams message identity');
+  if (!message.run_id || !message.correlation_id || !message.room_id || !message.sender || !message.recipient) throw new TypeError('missing AgentTeams message identity');
   if (!message.body || typeof message.body !== 'object') throw new TypeError('AgentTeams message body must be an object');
   return message;
 }
@@ -90,8 +93,8 @@ export class AgentTeamsAdapter {
     this.team = team;
   }
 
-  async publish({ runId, sender, recipient, kind, body, envelope = null }) {
-    if (!runId || !sender || !recipient || !kind) throw new TypeError('runId, sender, recipient, and kind are required');
+  async publish({ runId, correlationId, sender, recipient, kind, body, envelope = null }) {
+    if (!runId || !correlationId || !sender || !recipient || !kind) throw new TypeError('runId, correlationId, sender, recipient, and kind are required');
     if (envelope) assertEnvelope(envelope);
     const message = {
       message_id: id('msg', `${runId}:${sender}:${recipient}:${kind}:${JSON.stringify(body)}`),
@@ -99,6 +102,7 @@ export class AgentTeamsAdapter {
       runtime_version: AGENTTEAMS_VERSION,
       room_id: this.roomId,
       run_id: runId,
+      correlation_id: correlationId,
       sender,
       recipient,
       kind,
@@ -110,17 +114,19 @@ export class AgentTeamsAdapter {
     return this.transport.send(message);
   }
 
-  async startRun({ runId, taskId, objective, manager = 'planner' }) {
+  async startRun({ runId, correlationId = `corr-${runId}`, taskId, objective, manager = 'manager' }) {
     if (!runId || !taskId || !objective) throw new TypeError('runId, taskId, and objective are required');
     return this.publish({
-      runId, sender: 'human', recipient: manager, kind: 'task.assign',
+      runId, correlationId, sender: 'human', recipient: manager, kind: 'task.assign',
       body: { task_id: taskId, objective, team: this.team.metadata.name, acceptance: ['independent verification', 'MC review'] }
     });
   }
 
-  async handoff({ runId, envelope }) {
+  async handoff({ runId, correlationId, envelope }) {
     assertEnvelope(envelope);
-    return this.publish({ runId, sender: envelope.sender, recipient: envelope.recipient, kind: `handoff.${envelope.kind}`, body: envelope.payload, envelope });
+    const effectiveCorrelationId = correlationId ?? envelope.correlation_id;
+    if (envelope.run_id !== runId || envelope.correlation_id !== effectiveCorrelationId) throw new TypeError('handoff lineage mismatch');
+    return this.publish({ runId, correlationId: effectiveCorrelationId, sender: envelope.sender, recipient: envelope.recipient, kind: `handoff.${envelope.kind}`, body: envelope.payload, envelope });
   }
 
   static decode(message) { return validateAgentTeamsEnvelope(message); }

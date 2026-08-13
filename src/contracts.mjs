@@ -13,14 +13,15 @@ export function assertEnvelope(envelope) {
   for (const key of ['envelope_id', 'task_id', 'sender', 'recipient', 'kind', 'version', 'payload', 'created_at']) {
     if (envelope[key] === undefined || envelope[key] === null) throw new TypeError(`missing envelope field: ${key}`);
   }
+  for (const key of ['run_id', 'correlation_id']) if (!envelope[key] || typeof envelope[key] !== 'string') throw new TypeError(`missing envelope field: ${key}`);
   if (!ROLES.includes(envelope.sender) && envelope.sender !== 'system') throw new TypeError('invalid envelope sender');
   if (!ROLES.includes(envelope.recipient) && envelope.recipient !== 'control-plane') throw new TypeError('invalid envelope recipient');
   if (!Number.isInteger(envelope.version) || envelope.version < 1) throw new TypeError('envelope version must be a positive integer');
   return envelope;
 }
 
-export function makeEnvelope({ taskId, sender, recipient, kind, payload, previous = null, clock = () => new Date().toISOString() }) {
-  const body = { task_id: taskId, sender, recipient, kind, version: previous ? previous.version + 1 : 1, payload, previous_hash: previous ? sha256(previous) : null };
+export function makeEnvelope({ taskId, runId = `run-${taskId}`, correlationId = `corr-${taskId}`, sender, recipient, kind, payload, previous = null, clock = () => new Date().toISOString() }) {
+  const body = { task_id: taskId, run_id: runId, correlation_id: correlationId, sender, recipient, kind, version: previous ? previous.version + 1 : 1, payload, previous_hash: previous ? sha256(previous) : null };
   const envelope = { envelope_id: `env-${sha256(body).slice(0, 16)}`, ...body, created_at: clock() };
   return assertEnvelope(envelope);
 }

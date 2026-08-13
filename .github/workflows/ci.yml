@@ -1,0 +1,26 @@
+name: M5 package
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run setup
+      - run: npm run check
+      - run: npm test
+      - run: npm run integration
+      - run: npm run evaluate
+      - run: npm run zero-touch:reset
+      - run: npm run zero-touch
+      - run: npm run zero-touch:validate
+      - run: npm run zero-touch:replay
+      - run: npm run zero-touch:evaluate
+      - run: npm run package:check
+      - run: npm run package

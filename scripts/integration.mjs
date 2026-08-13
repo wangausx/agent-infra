@@ -2,7 +2,8 @@ import { createIsolatedMissionControlServer } from '../src/isolated-mc-server.mj
 import { MissionControlClient, MemoryControlPlane } from '../src/mission-control-client.mjs';
 import { runClosedLoop } from '../src/runtime.mjs';
 
-const isolated = createIsolatedMissionControlServer({ port: Number(process.env.MISSION_CONTROL_PORT ?? 3015) });
+// Use an ephemeral fixture port by default so the project test cannot collide with the persistent isolated MC service on :3015.
+const isolated = createIsolatedMissionControlServer({ port: Number(process.env.MISSION_CONTROL_PORT ?? 0) });
 const port = await isolated.listen();
 const client = new MissionControlClient({ baseUrl: `http://127.0.0.1:${port}`, mode: 'isolated', dryRun: false });
 const taskContract = { version: 1, objective: 'Verify native adapter flow', execution: { mode: 'agent' }, acceptance: [{ id: 'acceptance-1', requirement: 'create returns task', required: true, status: 'pending', evidence: [] }, { id: 'acceptance-2', requirement: 'review returns in-review', required: true, status: 'pending', evidence: [] }], review: { verdict: 'pending', checks: [{ id: 'review-ready', requirement: 'summary and evidence', required: true, status: 'pending', evidence: [] }] } };

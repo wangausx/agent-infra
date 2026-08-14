@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-infra/agent-handoff-v1",
+  "type": "object",
+  "required": ["schema","handoff_id","run_id","correlation_id","task_id","sender","recipient","layer","context_version","input_artifacts","permitted_action","rollback_condition","host"],
+  "properties": {
+    "schema": {"const":"agent-infra/agent-handoff-v1"},
+    "handoff_id": {"type":"string","minLength":1}, "run_id": {"type":"string","minLength":1}, "correlation_id": {"type":"string","minLength":1}, "task_id": {"type":"string","minLength":1},
+    "sender": {"type":"string","minLength":1}, "recipient": {"type":"string","minLength":1}, "layer": {"enum":["operational","governance"]}, "context_version": {"type":"integer","minimum":1},
+    "input_artifacts": {"type":"array","items":{"type":"string"}}, "permitted_action": {"type":"string","minLength":1}, "rollback_condition": {"type":"string","minLength":1},
+    "host": {"type":"object","required":["identity","layer"],"properties":{"identity":{"type":"string"},"layer":{"enum":["infrastructure","operational"]}},"additionalProperties":false}
+  },
+  "additionalProperties": false
+}

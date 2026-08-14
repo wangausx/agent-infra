@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-infra/agentteams-operational-runtime-map-v1",
+  "schema": "agent-infra/agentteams-operational-runtime-map/v1",
+  "runtime": "AgentTeams",
+  "control_plane": "Mission Control",
+  "stages": [
+    {"stage":"ALERT","primitive":"manager.create_task","agent":"Signal-Incident","artifact":"incident.json"},
+    {"stage":"INCIDENT","primitive":"manager.claim_and_context","agent":"Signal-Incident","artifact":"mission-control-snapshot.json"},
+    {"stage":"RCA","primitive":"team.parallel_tasks","agent":"RCA-TimeSync|RCA-Calibration|RCA-Environment","artifact":"rca-report.json"},
+    {"stage":"POLICY","primitive":"policy_gate","agent":"Policy-Safety","artifact":"policy-decision.json"},
+    {"stage":"ACTION","primitive":"approved_tool_call","agent":"Remediation","artifact":"action-result.json"},
+    {"stage":"VERIFY","primitive":"independent_worker_readback","agent":"Independent-Verification","artifact":"verifier-report.json"},
+    {"stage":"POSTMORTEM","primitive":"evidence_consolidation","agent":"Learning-Postmortem","artifact":"postmortem.md"},
+    {"stage":"REVIEW","primitive":"review_gate","agent":"Operations-Review","artifact":"scorecard.json"}
+  ],
+  "invariants": ["same run_id and correlation_id across handoffs", "production_writes=false", "verification reads observed state", "rejected evidence remains visible"]
+}

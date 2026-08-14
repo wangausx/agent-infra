@@ -30,6 +30,7 @@ test('evidence bundle binds identity, five-role lineage, and safety boundary', a
   assert.equal(scorecard.production_writes, false);
   assert.equal(scorecard.physical_vehicle_used, false);
   assert.equal(snapshot.task.status, 'in-review');
+  assert.ok(snapshot.task.evidence.length >= 6);
   for (const name of REQUIRED) assert.ok((await fs.stat(path.join(dir, name))).size > 0, `${name} must be non-empty`);
 });
 

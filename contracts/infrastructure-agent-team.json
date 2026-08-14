@@ -1,0 +1,11 @@
+{
+  "schema": "agent-infra/infrastructure-agent-team/v1",
+  "metadata": {"name": "trustops-governance-hosts", "version": "1.0.0"},
+  "infrastructure_hosts": [
+    {"identity":"Danny","role":"manager","responsibilities":["intake","routing","policy-gate"],"prohibited_actions":["self-attest-execution","self-attest-verification"]},
+    {"identity":"Morgan","role":"team-leader","responsibilities":["decomposition","dependency-management","context-routing"],"prohibited_actions":["bypass-policy","rewrite-operational-conclusion"]},
+    {"identity":"Rex","role":"execution-host","responsibilities":["bounded-tool-hosting","lease-heartbeat"],"prohibited_actions":["execute-unapproved-action"]},
+    {"identity":"Dr. Sage","role":"verification-host","responsibilities":["independent-observation","verification-report"],"prohibited_actions":["accept-executor-self-report"]},
+    {"identity":"Juno","role":"consolidation-host","responsibilities":["knowledge-write","review-projection"],"prohibited_actions":["promote-rejected-evidence"]}
+  ]
+}

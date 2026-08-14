@@ -4,7 +4,7 @@ import path from 'node:path';
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const required = [
   'README.md', 'package.json', '.env.example', 'docs/disclosure.md',
-  'docs/solution-architecture.md', 'docs/m5-package.md', 'docs/agent-identity-list.md', 'docs/skill-checklist.md', 'docs/threat-model.md',
+  'docs/trustops-architecture.md', 'docs/m5-package.md', 'docs/agent-identity-list.md', 'docs/skill-checklist.md', 'docs/threat-model.md',
   'artifacts/trustops-solution-architecture.html',
   'scenarios/autonomy-sensor-fusion/fixture.mjs',
   'scenarios/autonomy-sensor-fusion/alerts.json',

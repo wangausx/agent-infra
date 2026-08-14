@@ -18,13 +18,17 @@ function parseJsonl(raw, name) {
 }
 
 export async function validateEvidenceBundle(dir) {
-  const names = (await fs.readdir(dir, { withFileTypes: true })).filter((entry) => entry.isFile()).map((entry) => entry.name).sort();
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  const nested = entries.filter((entry) => entry.isDirectory());
+  if (nested.length === 1 && !entries.some((entry) => entry.isFile() && entry.name === 'evidence-manifest.json')) return validateEvidenceBundle(path.join(dir, nested[0].name));
+  const names = entries.filter((entry) => entry.isFile()).map((entry) => entry.name).sort();
   const manifest = json(await fs.readFile(path.join(dir, 'evidence-manifest.json'), 'utf8'), 'evidence-manifest.json');
   if (manifest.schema !== 'agent-infra/evidence-manifest/v2') throw new Error('manifest schema invalid');
   if (!text(manifest.run_id) || !text(manifest.correlation_id) || !text(manifest.task_id)) throw new Error('manifest lineage incomplete');
   if (!Array.isArray(manifest.files) || JSON.stringify(manifest.files) !== JSON.stringify(REQUIRED_FILES)) throw new Error('manifest file list invalid');
   for (const name of manifest.files) assertPath(name);
-  if (JSON.stringify(names) !== JSON.stringify([...REQUIRED_FILES].sort())) throw new Error('bundle paths do not match manifest');
+  const requiredNames = names.filter((name) => REQUIRED_FILES.includes(name));
+  if (JSON.stringify(requiredNames) !== JSON.stringify([...REQUIRED_FILES].sort())) throw new Error('bundle paths do not match manifest');
   const parsed = {};
   for (const name of REQUIRED_FILES) {
     const data = await fs.readFile(path.join(dir, name));

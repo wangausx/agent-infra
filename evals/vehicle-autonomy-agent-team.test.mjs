@@ -42,7 +42,7 @@ test('vehicle autonomy agents preserve separation of duty and safety boundary', 
 });
 
 test('vehicle autonomy flow documentation and package architecture entry point exist', async () => {
-  for (const file of ['docs/vehicle-autonomy-zero-touch-flow.md', 'docs/trustops-architecture.md']) {
+  for (const file of ['ARCHITECTURE.md', 'DISCLOSURE.md']) {
     const content = await fs.readFile(new URL(`../${file}`, import.meta.url), 'utf8');
     assert.match(content, /mermaid/);
     assert.match(content, /input|Input/);

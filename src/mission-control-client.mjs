@@ -17,7 +17,7 @@ function requireNativeTask(task) {
 }
 
 export class MissionControlClient {
-  constructor({ baseUrl = process.env.MISSION_CONTROL_BASE_URL ?? 'http://192.168.1.140:3015', mode = process.env.MISSION_CONTROL_MODE ?? 'isolated', protocol = NATIVE_PROTOCOL, dryRun = process.env.DRY_RUN !== 'false', allowProductionWrites = false, authToken = process.env.MISSION_CONTROL_AUTH_TOKEN, apiVersion = '0.1.0', minRequestIntervalMs = 0, fetchImpl = fetch, clock = () => Date.now() } = {}) {
+  constructor({ baseUrl = process.env.MISSION_CONTROL_BASE_URL ?? 'http://127.0.0.1:3015', mode = process.env.MISSION_CONTROL_MODE ?? 'isolated', protocol = NATIVE_PROTOCOL, dryRun = process.env.DRY_RUN !== 'false', allowProductionWrites = false, authToken = process.env.MISSION_CONTROL_AUTH_TOKEN, apiVersion = '0.1.0', minRequestIntervalMs = 0, fetchImpl = fetch, clock = () => Date.now() } = {}) {
     this.baseUrl = baseUrl.replace(/\/$/, ''); this.mode = mode; this.protocol = protocol; this.dryRun = dryRun; this.allowProductionWrites = allowProductionWrites; this.authToken = authToken; this.apiVersion = apiVersion; this.minRequestIntervalMs = minRequestIntervalMs; this.fetch = fetchImpl; this.clock = clock; this.lastRequestAt = 0;
   }
   #assertTargetAllowed() {

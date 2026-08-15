@@ -16,7 +16,7 @@ This repository is the collaboration, governance-adapter, scenario, and reproduc
 
 ## Design and progress plan
 
-The refined architecture, native Mission Control boundary, phased implementation plan, acceptance matrix, and next checkpoint are tracked in [`docs/design-and-plan.md`](docs/design-and-plan.md).
+The public architecture, Mission Control boundary, acceptance matrix, and reproduction instructions are maintained in the root release documents listed below.
 
 ## Quick start
 
@@ -33,7 +33,7 @@ The demo is deterministic, in-memory, isolated, and dry-run. It does not mutate 
 
 ## Mission Control target
 
-Agent Infra task-board operations use the isolated board at `http://192.168.1.140:3015`. Set `MISSION_CONTROL_BASE_URL` to that endpoint. The production `:3005` instance is read-only reference data for this project and the client rejects it by default.
+Use the isolated endpoint configured by `MISSION_CONTROL_BASE_URL` in your local `.env` file. The example defaults to localhost and does not contain device-specific addresses.
 
 ## Boundary
 
@@ -52,18 +52,10 @@ tools/        MCP/equivalent tool contract documentation
 scenarios/    reproducible scenario documentation
 evals/        runtime tests and fault-injection checks
 deploy/       isolated demo configuration
-docs/         architecture, operations, disclosure, and plans
 scripts/      deterministic setup/check/demo/evaluation helpers
 artifacts/    generated scorecards, traces, evidence manifests, and replay bundles
 ```
 
-M5 package references:
-
-- [`docs/m5-package.md`](docs/m5-package.md): exact setup/demo/package reproduction.
-- [`docs/agent-identity-list.md`](docs/agent-identity-list.md): named role authorities and prohibitions.
-- [`docs/skill-checklist.md`](docs/skill-checklist.md): Skill permissions and failure modes.
-- [`docs/threat-model.md`](docs/threat-model.md): trust boundaries, mitigations, and residual risks.
-
 ## Safety
 
-No production writes by default. High-risk Skills require approval when not in dry-run. Mission Control source and data are outside this repository and are not modified by the demo or tests.
+No production writes by default. High-risk Skills require approval when not in dry-run. External Mission Control source and data are not included in this repository and are not modified by the demo or tests.

@@ -19,7 +19,8 @@ npm run package:check
 git diff --check || true
 
 # Live AgentTeams Manager integration requires external env; discover the deployed Manager room/user when the env file is available
-if [ -n "${AGENTTEAMS_ENV_FILE:-}" ]; then
+if [ -n "${AGENTTEAMS_ENV_FILE:-}" ] || [ -f "/srv/agent-platform/runtime/agentteams-manager-v122-clean.env" ]; then
+  export AGENTTEAMS_ENV_FILE="${AGENTTEAMS_ENV_FILE:-/srv/agent-platform/runtime/agentteams-manager-v122-clean.env}"
   export AGENTTEAMS_DISCOVER_MANAGER=true
   export AGENTTEAMS_LIVE=true
   printf 'HEARTBEAT phase=agentteams-contract\n'

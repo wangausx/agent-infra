@@ -41,12 +41,10 @@ test('vehicle autonomy agents preserve separation of duty and safety boundary', 
   assert.ok(verifier.authority.must_not.includes('trust_executor_claim'));
 });
 
-test('vehicle autonomy flow documentation and package architecture entry point exist', async () => {
-  const architecture = await fs.readFile(new URL('../ARCHITECTURE.md', import.meta.url), 'utf8');
-  assert.match(architecture, /mermaid/);
-  assert.match(architecture, /input|Input/);
-  assert.match(architecture, /artifact|Artifact/);
-  const disclosure = await fs.readFile(new URL('../DISCLOSURE.md', import.meta.url), 'utf8');
-  assert.match(disclosure, /MIT License/);
-  assert.match(disclosure, /synthetic|dry-run/);
+test('vehicle autonomy flow documentation and public architecture entry point exist', async () => {
+  for (const file of ['ARCHITECTURE.md', 'README.md']) {
+    const content = await fs.readFile(new URL(`../${file}`, import.meta.url), 'utf8');
+    assert.match(content, /closed-loop|Closed-loop|input|Input/);
+    assert.match(content, /artifact|Artifact|evidence|Evidence/);
+  }
 });

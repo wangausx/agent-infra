@@ -14,6 +14,10 @@ __pycache__/
 *.pem
 *.key
 
+# Private project planning, research, and runtime state
+/docs/
+/state/
+
 # Runtime state and generated outputs
 .runtime/
 state/runtime/

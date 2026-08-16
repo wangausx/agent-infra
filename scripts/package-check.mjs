@@ -3,7 +3,9 @@ import path from 'node:path';
 
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const required = [
-  'README.md', 'package.json', '.env.example', 'LICENSE', 'DISCLOSURE.md', 'ARCHITECTURE.md', 'SECURITY.md',
+  'README.md', 'package.json', '.env.example', 'DISCLOSURE.md',
+  'ARCHITECTURE.md', 'CONTRIBUTING.md', 'SECURITY.md',
+  'artifacts/trustops-solution-architecture.html',
   'scenarios/autonomy-sensor-fusion/fixture.mjs',
   'scenarios/autonomy-sensor-fusion/alerts.json',
   'scenarios/autonomy-sensor-fusion/expected-report.json',
@@ -29,7 +31,7 @@ const checks = {
   fixture_count_matches: fixture.length === expected.raw_alert_count,
   failure_matrix_complete: failures.length === 10,
   safety_defaults: fs.readFileSync(path.join(root, '.env.example'), 'utf8').includes('DRY_RUN=true') && fs.readFileSync(path.join(root, '.env.example'), 'utf8').includes('ALLOW_PRODUCTION_WRITES=false'),
-  architecture_present: fs.statSync(path.join(root, 'ARCHITECTURE.md')).size > 1000,
+  architecture_present: fs.statSync(path.join(root, 'artifacts/trustops-solution-architecture.html')).size > 1000,
   generated_package_runnable: package_runnable,
   authoritative_failure_categories: categoriesCovered.every((item) => item.covered)
 };

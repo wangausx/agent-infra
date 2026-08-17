@@ -1,3 +1,4 @@
+import { approveForTraining } from './episode-governance.mjs';
 import { appendFile, readFile, writeFile } from 'node:fs/promises';
 
 const LABEL_VALUES = new Set(['verified', 'rejected', 'unknown']);
@@ -21,7 +22,15 @@ export function applyOutcomeLabel(episode, label) {
 }
 
 export async function appendOutcomeLabel(ledgerPath, label) {
-  const validated = createOutcomeLabel(label);
+  const validated = createOutcomeLabel({
+    labelId: label.labelId ?? label.label_id,
+    episodeId: label.episodeId ?? label.episode_id,
+    reviewer: label.reviewer,
+    labeledAt: label.labeledAt ?? label.labeled_at,
+    labels: label.labels,
+    evidenceRefs: label.evidenceRefs ?? label.evidence_refs,
+    overturned: label.overturned
+  });
   let existing = [];
   try { existing = (await readFile(ledgerPath, 'utf8')).split(/\r?\n/).filter(Boolean).map(JSON.parse); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   if (existing.some((row) => row.label_id === validated.label_id)) throw new Error(`duplicate label_id: ${validated.label_id}`);
@@ -29,7 +38,7 @@ export async function appendOutcomeLabel(ledgerPath, label) {
   return validated;
 }
 
-export async function applyLedgerToEpisodes(episodes, ledgerPath) {
+export async function applyLedgerToEpisodes(episodes, ledgerPath, { approve = false } = {}) {
   let labels = [];
   try { labels = (await readFile(ledgerPath, 'utf8')).split(/\r?\n/).filter(Boolean).map(JSON.parse); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   const byEpisode = new Map();
@@ -38,7 +47,12 @@ export async function applyLedgerToEpisodes(episodes, ledgerPath) {
     const current = byEpisode.get(label.episode_id);
     if (!current || current.labeled_at < label.labeled_at) byEpisode.set(label.episode_id, label);
   }
-  return episodes.map((episode) => byEpisode.has(episode.episode_id) ? applyOutcomeLabel(episode, byEpisode.get(episode.episode_id)) : episode);
+  return episodes.map((episode) => {
+    const label = byEpisode.get(episode.episode_id);
+    if (!label) return episode;
+    const labeled = applyOutcomeLabel(episode, label);
+    return approve ? approveForTraining(labeled, { reviewer: label.reviewer, reviewedAt: label.labeled_at, labels: label.labels }) : labeled;
+  });
 }
 
 export async function writeLabeledEpisodes(path, episodes) {

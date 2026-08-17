@@ -10,6 +10,7 @@ import { summarizeMetrics } from '../src/metrics.mjs';
 import { ToolResponseRecorder, canonicalJson, readToolRecording, writeToolRecording } from '../src/replay/tool-response-recorder.mjs';
 import { correlateAlerts } from '../src/zero-touch/alert-correlator.mjs';
 import { loadCausalViewModel, renderTerminal, renderUiHtml } from '../src/causal-timeline.mjs';
+import { finalizeRun } from '../src/operational-adapter.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const RUNS = path.join(ROOT, 'artifacts', 'runs');
@@ -61,7 +62,7 @@ async function persist(run, { recording = null } = {}) {
   const dir = path.join(RUNS, report.run_id);
   await fs.rm(dir, { recursive: true, force: true }); await fs.mkdir(dir, { recursive: true });
   const scorecard = { schema: 'agent-infra/zero-touch-scorecard/v1', run_id: report.run_id, scenario: 'autonomy-sensor-fusion', verdict: report.verdict, stages: report.stages, roles: run.roles, production_writes: false, physical_vehicle_used: false, measurable_value: { raw_alerts: 12, suppressed_alerts: 4, incidents: 1, action: report.policy.action } };
-  const manifest = { schema: 'agent-infra/evidence-manifest/v2', run_id: report.run_id, correlation_id: report.correlation_id, seed: report.seed, team_id: report.manifest.team_id, room_id: report.manifest.room_id, project_id: report.manifest.project_id, task_id: task.id, files: ['scorecard.json','incident.json','suppression-evidence.jsonl','rca-report.json','policy-decision.json','action-result.json','verifier-report.json','postmortem.md','trace.jsonl','intervention-ledger.jsonl','mission-control-snapshot.json','evidence-manifest.json'], identities: run.roles, safety: scorecard };
+  const manifest = { schema: 'agent-infra/evidence-manifest/v2', run_id: report.run_id, correlation_id: report.correlation_id, seed: report.seed, observed_at: '2026-08-12T16:00:00.000Z', team_id: report.manifest.team_id, room_id: report.manifest.room_id, project_id: report.manifest.project_id, task_id: task.id, files: ['scorecard.json','incident.json','suppression-evidence.jsonl','rca-report.json','policy-decision.json','action-result.json','verifier-report.json','postmortem.md','trace.jsonl','intervention-ledger.jsonl','mission-control-snapshot.json','evidence-manifest.json'], identities: run.roles, safety: scorecard };
   assertSameRun(run, manifest);
   await writeJson(path.join(dir, 'scorecard.json'), scorecard);
   await writeJson(path.join(dir, 'incident.json'), report.incident);
@@ -83,8 +84,9 @@ async function persist(run, { recording = null } = {}) {
   manifest.sha256 = {};
   for (const file of hashedFiles) manifest.sha256[file] = crypto.createHash('sha256').update(await fs.readFile(path.join(dir, file))).digest('hex');
   await writeJson(path.join(dir, 'evidence-manifest.json'), manifest);
-  await writeJson(STATE, { run_id: report.run_id, artifact_dir: dir, verdict: report.verdict });
-  return { dir, scorecard, manifest };
+  const finalization = await finalizeRun({ runPath: dir, episodesPath: path.join(ROOT, 'artifacts', 'datasets', 'episodes-v1.jsonl'), quarantinePath: path.join(ROOT, 'artifacts', 'datasets', 'quarantine-v1.jsonl') });
+  await writeJson(STATE, { run_id: report.run_id, artifact_dir: dir, verdict: report.verdict, finalization });
+  return { dir, scorecard, manifest, finalization };
 }
 
 const command = process.argv[2] ?? 'demo';

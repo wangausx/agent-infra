@@ -131,6 +131,7 @@ export async function collectEpisodeFromRun(runPath) {
     },
     context: {
       seed: manifest.seed ?? null,
+      observed_at: manifest.observed_at ?? null,
       scenario: scorecard.scenario ?? manifest.safety?.scenario ?? null,
       project_id: manifest.project_id ?? null,
       task_id: manifest.task_id ?? null,

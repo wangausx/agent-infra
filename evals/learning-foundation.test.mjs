@@ -6,7 +6,7 @@ import { applyGovernance, approveForTraining, quarantineEpisode } from '../src/e
 import { buildIncumbentBaseline } from '../src/incumbent-baseline.mjs';
 import { createOutcomeLabel, applyOutcomeLabel } from '../src/outcome-label-ledger.mjs';
 import { assertNoLeakage, validateNoLeakage, assertReplayIntegrity } from '../src/replay-audit.mjs';
-import { buildQualityDashboard } from '../src/episode-quality.mjs';
+import { buildQualityDashboard, computeWindowDrift } from '../src/episode-quality.mjs';
 
 const fixture = 'artifacts/runs/run-e921dfe97489eb24';
 
@@ -65,4 +65,13 @@ test('quality dashboard reports completeness, labels, safety, and deferred drift
   assert.equal(dashboard.completeness.unknown_outcome_rate, 1);
   assert.equal(dashboard.safety.production_write_attempts, 0);
   assert.equal(dashboard.drift.status, 'not-computed');
+});
+
+test('quality drift compares explicit approved windows without inventing missing data', () => {
+  const reference = [{ outcomes: { immediate: 'verified', delayed: 'unknown', recurrence: 'unknown', time_to_recovery_ms: 100 } }];
+  const current = [{ outcomes: { immediate: 'rejected', delayed: 'unknown', recurrence: 'unknown', time_to_recovery_ms: 250 } }];
+  const drift = computeWindowDrift(reference, current);
+  assert.equal(drift.status, 'computed');
+  assert.equal(drift.categorical.immediate.total_variation, 1);
+  assert.equal(drift.performance.mean_delta_ms, 150);
 });

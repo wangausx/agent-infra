@@ -24,7 +24,7 @@
     "episodes:finalize": "node scripts/finalize-run.mjs",
     "episodes:simulate": "node scripts/simulate-learning-fixture.mjs",
     "release:packet": "node scripts/release-gate-packet.mjs",
-    "episodes:test": "node --test evals/episode-collector.test.mjs evals/learning-foundation.test.mjs evals/dataset-snapshot.test.mjs evals/assistive-learning.test.mjs evals/release-gate-packet.test.mjs evals/simulation-fixture.test.mjs",
+    "episodes:test": "node --test evals/episode-collector.test.mjs evals/learning-foundation.test.mjs evals/dataset-snapshot.test.mjs evals/assistive-learning.test.mjs evals/release-gate-packet.test.mjs evals/simulation-fixture.test.mjs evals/causal-evidence-ledger.test.mjs",
     "episodes:baseline": "node src/incumbent-baseline.mjs",
     "episodes:quality": "node src/episode-quality.mjs",
     "evaluate": "node scripts/evaluate.mjs",

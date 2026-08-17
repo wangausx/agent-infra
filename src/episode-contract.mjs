@@ -1,7 +1,7 @@
 const TOP_LEVEL_KEYS = [
   'schema', 'episode_id', 'run_id', 'correlation_id', 'source', 'context',
   'identities', 'claims', 'observations', 'hypotheses', 'decision', 'action',
-  'verification', 'outcomes', 'versions', 'privacy', 'dataset_membership'
+  'verification', 'outcomes', 'causal_evidence', 'versions', 'privacy', 'dataset_membership'
 ];
 const OUTCOME_VALUES = new Set(['verified', 'rejected', 'unknown']);
 const PRIVACY_CLASSIFICATIONS = new Set(['internal-synthetic', 'internal-sensitive', 'restricted', 'public']);
@@ -9,6 +9,7 @@ const REDACTION_STATUSES = new Set(['not-reviewed', 'not-required', 'required', 
 const DATASET_STATUSES = new Set(['pending-review', 'quarantined', 'approved', 'rejected']);
 
 import { validateClaims } from './episode-claims.mjs';
+import { validateCausalEvidence } from './causal-evidence-ledger.mjs';
 
 const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 
@@ -23,9 +24,10 @@ export function validateEpisode(episode) {
   if (!isObject(episode.source) || !Array.isArray(episode.source.files) || !isObject(episode.source.sha256)) errors.push('source must contain files and sha256');
   if (!Array.isArray(episode.identities)) errors.push('identities must be an array');
   errors.push(...validateClaims(episode.claims, episode.source?.files ?? []));
-  for (const section of ['observations', 'hypotheses', 'decision', 'action', 'verification', 'outcomes', 'versions', 'privacy', 'dataset_membership']) {
+  for (const section of ['observations', 'hypotheses', 'decision', 'action', 'verification', 'outcomes', 'causal_evidence', 'versions', 'privacy', 'dataset_membership']) {
     if (!isObject(episode[section])) errors.push(`${section} must be an object`);
   }
+  errors.push(...validateCausalEvidence(episode.causal_evidence, episode.source?.files ?? []));
   if (isObject(episode.outcomes)) {
     for (const field of ['immediate', 'delayed', 'recurrence', 'collateral_impact', 'human_override', 'business_impact']) {
       if (!OUTCOME_VALUES.has(episode.outcomes[field])) errors.push(`outcomes.${field} must be verified, rejected, or unknown`);

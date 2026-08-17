@@ -3,6 +3,7 @@ import { readdir, readFile, stat, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { assertValidEpisode } from './episode-contract.mjs';
 import { buildEpisodeClaims } from './episode-claims.mjs';
+import { buildCausalEvidence } from './causal-evidence-ledger.mjs';
 
 const MANIFEST_NAME = 'evidence-manifest.json';
 const JSON_FILES = new Set([
@@ -172,6 +173,7 @@ export async function collectEpisodeFromRun(runPath) {
       checks: verifier.checks ?? [],
       evidence: verifier.evidence ?? []
     },
+    causal_evidence: buildCausalEvidence({ runId, scenario: scorecard.scenario ?? manifest.safety?.scenario ?? null, rca, policy, action, verifier, scorecard }),
     outcomes: {
       immediate: outcomeStatus,
       delayed: 'unknown',

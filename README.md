@@ -27,7 +27,8 @@ See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the runtime boundary, lifecycle, re
 - Skill registry, approval enforcement, bounded tool execution, rollback/compensation, traces, and knowledge consolidation.
 - Deterministic in-memory and isolated HTTP control-plane harnesses.
 - Evidence hashing, tamper rejection, replay validation, failure injection, and reproducible evaluation.
-- Operational-learning foundation: versioned episode contracts, read-only episode collection, typed claims, privacy/retention governance, delayed outcome labels, incumbent baselines, replay audits, and quality dashboards.
+- Operational-learning foundation: versioned episode contracts, read-only episode collection, typed claims, privacy/retention governance, delayed outcome labels, validated reviewer identity, incumbent baselines, replay audits, quality dashboards, deterministic snapshots, window-readiness gating, and release-gate packets.
+- Offline synthetic-learning fixture that exercises three weeks/domains and proves the readiness/release packet path without production writes.
 - Read-only Scenario Run View integration with explicit production-write prohibition.
 
 ## Safety boundary
@@ -57,6 +58,8 @@ npm run demo
 npm run episodes:test
 npm run episodes:baseline
 npm run episodes:quality
+npm run episodes:simulate
+npm run release:packet
 npm run package:check
 ```
 
@@ -93,7 +96,9 @@ Recommendations must first run in shadow mode beside the deterministic incumbent
 
 ## Public-release boundary
 
-The public repository contains the sanitized collaboration, governance-adapter, scenario, evaluation, and reproducibility layer. Internal planning, research, runtime state, credentials, model/provider configuration, private hostnames, deployment paths, and operational data are not tracked in the public tree.
+The public repository contains the sanitized collaboration, governance-adapter, scenario, evaluation, and reproducibility layer. The operational-learning implementation includes offline synthetic fixtures, reviewer-identity validation, deterministic snapshot/readiness checks, and release-gate verification. These fixtures prove pipeline behavior only; they are not real-world performance evidence and do not authorize production writes or model promotion.
+
+Internal planning, research, runtime state, credentials, model/provider configuration, private hostnames, deployment paths, production telemetry, reviewer records, and operational data are not tracked in the public tree. Real-world release dependencies remain: approved telemetry integration, three real UTC weeks/domains of labeled episodes, live reviewer identity/UI integration, ground-truth metrics, privacy/retention review, and an explicitly approved bounded sandbox canary.
 
 ## License
 

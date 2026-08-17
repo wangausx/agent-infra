@@ -4,17 +4,24 @@ import { appendFile, readFile, writeFile } from 'node:fs/promises';
 const LABEL_VALUES = new Set(['verified', 'rejected', 'unknown']);
 const LABEL_FIELDS = ['delayed', 'recurrence', 'collateral_impact', 'human_override', 'business_impact'];
 
-export function createOutcomeLabel({ labelId, episodeId, reviewer, labeledAt, labels, evidenceRefs = [], overturned = false }) {
+function validateReviewerIdentity(identity) {
+  if (!identity || typeof identity !== 'object') throw new Error('reviewer_identity is required');
+  for (const field of ['id', 'role', 'auth_method']) if (!identity[field] || typeof identity[field] !== 'string') throw new Error(`reviewer_identity.${field} is required`);
+  return { id: identity.id, role: identity.role, auth_method: identity.auth_method };
+}
+
+export function createOutcomeLabel({ labelId, episodeId, reviewer, reviewerIdentity = null, labeledAt, labels, evidenceRefs = [], overturned = false }) {
   if (!labelId || !episodeId || !reviewer || !labeledAt) throw new Error('label_id, episode_id, reviewer, and labeled_at are required');
   if (!labels || typeof labels !== 'object') throw new Error('labels are required');
   for (const field of LABEL_FIELDS) if (!LABEL_VALUES.has(labels[field])) throw new Error(`labels.${field} must be verified, rejected, or unknown`);
   if (!Array.isArray(evidenceRefs)) throw new Error('evidence_refs must be an array');
-  return { schema: 'agent-infra/outcome-label/v1', label_id: labelId, episode_id: episodeId, reviewer, labeled_at: labeledAt, labels, evidence_refs: evidenceRefs, overturned: Boolean(overturned) };
+  const identity = reviewerIdentity ? validateReviewerIdentity(reviewerIdentity) : null;
+  return { schema: 'agent-infra/outcome-label/v1', label_id: labelId, episode_id: episodeId, reviewer, reviewer_identity: identity, labeled_at: labeledAt, labels, evidence_refs: evidenceRefs, overturned: Boolean(overturned) };
 }
 
 export function applyOutcomeLabel(episode, label) {
   if (label.episode_id !== episode.episode_id) throw new Error('label episode_id does not match episode');
-  const validated = createOutcomeLabel({ labelId: label.label_id, episodeId: label.episode_id, reviewer: label.reviewer, labeledAt: label.labeled_at, labels: label.labels, evidenceRefs: label.evidence_refs, overturned: label.overturned });
+  const validated = createOutcomeLabel({ labelId: label.label_id, episodeId: label.episode_id, reviewer: label.reviewer, reviewerIdentity: label.reviewer_identity, labeledAt: label.labeled_at, labels: label.labels, evidenceRefs: label.evidence_refs, overturned: label.overturned });
   const outcomes = { ...episode.outcomes };
   for (const field of LABEL_FIELDS) outcomes[field] = validated.labels[field];
   outcomes.unknown_fields = LABEL_FIELDS.filter((field) => outcomes[field] === 'unknown');
@@ -26,6 +33,7 @@ export async function appendOutcomeLabel(ledgerPath, label) {
     labelId: label.labelId ?? label.label_id,
     episodeId: label.episodeId ?? label.episode_id,
     reviewer: label.reviewer,
+    reviewerIdentity: label.reviewerIdentity ?? label.reviewer_identity,
     labeledAt: label.labeledAt ?? label.labeled_at,
     labels: label.labels,
     evidenceRefs: label.evidenceRefs ?? label.evidence_refs,

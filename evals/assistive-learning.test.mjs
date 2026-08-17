@@ -58,13 +58,18 @@ test('outcome ledger applies the latest reviewer label and approves only when ex
   const dir = await import('node:fs/promises');
   const path = '/tmp/agent-infra-outcome-ledger-test.jsonl';
   await dir.rm(path, { force: true });
-  const labeled = createOutcomeLabel({ labelId: 'label-1', episodeId: 'a', reviewer: 'reviewer-1', labeledAt: '2026-08-16T00:00:00Z', labels: { delayed: 'verified', recurrence: 'rejected', collateral_impact: 'verified', human_override: 'rejected', business_impact: 'verified' }, evidenceRefs: ['outcome.json'] });
+  const labeled = createOutcomeLabel({ labelId: 'label-1', episodeId: 'a', reviewer: 'reviewer-1', reviewerIdentity: { id: 'reviewer-1', role: 'agent-infra-reviewer', auth_method: 'local-test' }, labeledAt: '2026-08-16T00:00:00Z', labels: { delayed: 'verified', recurrence: 'rejected', collateral_impact: 'verified', human_override: 'rejected', business_impact: 'verified' }, evidenceRefs: ['outcome.json'] });
+  assert.deepEqual(labeled.reviewer_identity, { id: 'reviewer-1', role: 'agent-infra-reviewer', auth_method: 'local-test' });
   await appendOutcomeLabel(path, labeled);
   const [result] = await applyLedgerToEpisodes([episode('a', { privacy: { redaction_status: 'not-required' }, dataset_membership: { status: 'pending-review', eligible_for_training: false }, outcomes: { immediate: 'verified', delayed: 'unknown', recurrence: 'unknown', collateral_impact: 'unknown', human_override: 'unknown', business_impact: 'unknown', unknown_fields: ['delayed'] } })], path, { approve: true });
   assert.equal(result.outcomes.delayed, 'verified');
   assert.equal(result.dataset_membership.status, 'approved');
   assert.equal(result.dataset_membership.eligible_for_training, true);
 });
+test('reviewer identity is fail-closed when incomplete', () => {
+  assert.throws(() => createOutcomeLabel({ labelId: 'bad', episodeId: 'a', reviewer: 'reviewer-1', reviewerIdentity: { id: 'reviewer-1' }, labeledAt: '2026-08-16T00:00:00Z', labels: { delayed: 'unknown', recurrence: 'unknown', collateral_impact: 'unknown', human_override: 'unknown', business_impact: 'unknown' } }), /reviewer_identity.role/);
+});
+
 test('assistive metrics report labeled accuracy, calibration, replay, latency, and cost', () => {
   const labeled = episode('metric', { ground_truth: { cause: 'clock-skew' }, metadata: { shadow_latency_ms: 12, shadow_cost_usd: 0.02 } });
   const recommendations = buildShadowRecommendations(labeled);

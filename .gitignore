@@ -23,6 +23,11 @@ __pycache__/
 .mc-execution-task-*.json
 state/runtime/
 runs/
+# Public deterministic fixture required by the offline test suite
+!artifacts/runs/
+!artifacts/runs/run-e921dfe97489eb24/
+!artifacts/runs/run-e921dfe97489eb24/**
+!artifacts/runs/replay-recording.json
 artifacts/generated/
 logs/*.jsonl
 logs/*.log

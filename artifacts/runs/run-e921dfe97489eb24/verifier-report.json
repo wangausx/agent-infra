@@ -1,0 +1,47 @@
+{
+  "verdict": "PASS",
+  "checks": [
+    {
+      "check": "sensor-timestamp",
+      "passed": true
+    },
+    {
+      "check": "fusion-confidence",
+      "passed": true
+    },
+    {
+      "check": "localization-covariance",
+      "passed": true
+    },
+    {
+      "check": "tracking-confidence",
+      "passed": true
+    },
+    {
+      "check": "planner-mode",
+      "passed": true
+    },
+    {
+      "check": "safety-corridor",
+      "passed": true
+    },
+    {
+      "check": "observation-window",
+      "passed": true
+    },
+    {
+      "check": "duplicate-action",
+      "passed": true
+    }
+  ],
+  "evidence": [
+    "verification:sensor-timestamp",
+    "verification:fusion-confidence",
+    "verification:localization-covariance",
+    "verification:tracking-confidence",
+    "verification:planner-mode",
+    "verification:safety-corridor",
+    "verification:observation-window",
+    "verification:duplicate-action"
+  ]
+}

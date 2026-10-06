@@ -1,0 +1,55 @@
+{
+  "action": "resynchronize-sensor-timestamps",
+  "action_key": "run-e921dfe97489eb24:resynchronize-sensor-timestamps",
+  "executed": true,
+  "duplicate_action_count": 0,
+  "reversible": true,
+  "before_state": {
+    "action_generation": 0,
+    "compute_healthy": true,
+    "fusion_confidence": 0.61,
+    "gps_healthy": true,
+    "inside_safety_corridor": true,
+    "lidar_camera_offset_ms": 146,
+    "map_match_healthy": true,
+    "max_speed_mps": 2.2,
+    "planner_mode": "conservative",
+    "position": {
+      "x": 39,
+      "y": 0.3
+    },
+    "position_covariance_m2": 0.43,
+    "route_progress_ratio": 0.71,
+    "simulation_only": true,
+    "thermal_healthy": true,
+    "tracking_confidence": 0.67,
+    "twin_id": "shuttle-dt-01",
+    "vehicle_mode": "autonomous-simulated"
+  },
+  "after_state": {
+    "action_generation": 1,
+    "compute_healthy": true,
+    "fusion_confidence": 0.91,
+    "gps_healthy": true,
+    "inside_safety_corridor": true,
+    "lidar_camera_offset_ms": 32,
+    "map_match_healthy": true,
+    "max_speed_mps": 2.2,
+    "planner_mode": "nominal",
+    "position": {
+      "x": 39,
+      "y": 0.3
+    },
+    "position_covariance_m2": 0.12,
+    "route_progress_ratio": 0.71,
+    "simulation_only": true,
+    "thermal_healthy": true,
+    "tracking_confidence": 0.92,
+    "twin_id": "shuttle-dt-01",
+    "vehicle_mode": "autonomous-simulated"
+  },
+  "compensation": {
+    "available": true,
+    "action": "restore:run-e921dfe97489eb24:resynchronize-sensor-timestamps"
+  }
+}

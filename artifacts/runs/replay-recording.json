@@ -1,0 +1,260 @@
+{
+  "schema": "agent-infra/tool-response-recording/v1",
+  "version": 1,
+  "entries": [
+    {
+      "sequence": 0,
+      "tool": "autonomy.readAlerts",
+      "request": {
+        "scenario_id": "autonomy-sensor-fusion"
+      },
+      "response": [
+        {
+          "alert_id": "alert-001",
+          "component": "sensor-fusion-worker-a",
+          "kind": "sensor-timestamp-drift",
+          "message": "LiDAR frame timestamp drift exceeds fusion tolerance",
+          "metric": "lidar_camera_offset_ms",
+          "occurred_at": "2026-08-12T16:00:00.000Z",
+          "severity": "warning",
+          "source": "lidar-front",
+          "threshold": 40,
+          "value": 146
+        },
+        {
+          "alert_id": "alert-002",
+          "component": "sensor-fusion-worker-a",
+          "kind": "fusion-confidence-low",
+          "message": "Camera and LiDAR fusion confidence degraded",
+          "metric": "fusion_confidence",
+          "occurred_at": "2026-08-12T16:00:05.000Z",
+          "severity": "warning",
+          "source": "fusion-worker-a",
+          "threshold": 0.82,
+          "value": 0.61
+        },
+        {
+          "alert_id": "alert-003",
+          "component": "localization",
+          "kind": "localization-covariance-high",
+          "message": "Localization covariance above warning threshold",
+          "metric": "position_covariance_m2",
+          "occurred_at": "2026-08-12T16:00:10.000Z",
+          "severity": "warning",
+          "source": "localization-ekf",
+          "threshold": 0.2,
+          "value": 0.43
+        },
+        {
+          "alert_id": "alert-004",
+          "component": "perception-tracking",
+          "kind": "tracking-confidence-low",
+          "message": "Tracked-object confidence degraded",
+          "metric": "tracking_confidence",
+          "occurred_at": "2026-08-12T16:00:15.000Z",
+          "severity": "warning",
+          "source": "object-tracker",
+          "threshold": 0.85,
+          "value": 0.67
+        },
+        {
+          "alert_id": "alert-005",
+          "component": "motion-planner",
+          "kind": "planner-conservative-speed",
+          "message": "Planner reduced maximum speed due to perception uncertainty",
+          "metric": "max_speed_mps",
+          "occurred_at": "2026-08-12T16:00:20.000Z",
+          "severity": "info",
+          "source": "motion-planner",
+          "threshold": 4,
+          "value": 2.2
+        },
+        {
+          "alert_id": "alert-006",
+          "component": "route-execution",
+          "kind": "route-progress-low",
+          "message": "Route progress below expected rate",
+          "metric": "progress_ratio",
+          "occurred_at": "2026-08-12T16:00:25.000Z",
+          "severity": "warning",
+          "source": "route-monitor",
+          "threshold": 0.9,
+          "value": 0.71
+        },
+        {
+          "alert_id": "alert-007",
+          "component": "sensor-fusion-worker-b",
+          "duplicate_of": "alert-002",
+          "kind": "fusion-confidence-low",
+          "message": "Camera and LiDAR fusion confidence degraded",
+          "metric": "fusion_confidence",
+          "occurred_at": "2026-08-12T16:00:30.000Z",
+          "severity": "warning",
+          "source": "fusion-worker-b",
+          "threshold": 0.82,
+          "value": 0.62
+        },
+        {
+          "alert_id": "alert-008",
+          "component": "sensor-fusion-worker-c",
+          "duplicate_of": "alert-002",
+          "kind": "fusion-confidence-low",
+          "message": "Camera and LiDAR fusion confidence degraded",
+          "metric": "fusion_confidence",
+          "occurred_at": "2026-08-12T16:00:31.000Z",
+          "severity": "warning",
+          "source": "fusion-worker-c",
+          "threshold": 0.82,
+          "value": 0.6
+        },
+        {
+          "alert_id": "alert-009",
+          "component": "localization",
+          "duplicate_of": "alert-003",
+          "kind": "localization-covariance-high",
+          "message": "Localization covariance remains above warning threshold",
+          "metric": "position_covariance_m2",
+          "occurred_at": "2026-08-12T16:00:32.000Z",
+          "severity": "warning",
+          "source": "localization-ekf",
+          "threshold": 0.2,
+          "value": 0.44
+        },
+        {
+          "alert_id": "alert-010",
+          "component": "perception-tracking",
+          "duplicate_of": "alert-004",
+          "kind": "tracking-confidence-low",
+          "message": "Tracked-object confidence remains degraded",
+          "metric": "tracking_confidence",
+          "occurred_at": "2026-08-12T16:00:33.000Z",
+          "severity": "warning",
+          "source": "object-tracker",
+          "threshold": 0.85,
+          "value": 0.66
+        },
+        {
+          "alert_id": "alert-011",
+          "component": "safety-monitor",
+          "kind": "safety-corridor-status",
+          "message": "Simulated shuttle remains inside the declared safety corridor",
+          "metric": "inside_corridor",
+          "occurred_at": "2026-08-12T16:00:34.000Z",
+          "severity": "info",
+          "source": "safety-monitor",
+          "threshold": true,
+          "value": true
+        },
+        {
+          "alert_id": "alert-012",
+          "component": "perception-stack",
+          "kind": "deployment-event",
+          "message": "Perception-stack deployment completed before degradation",
+          "metric": "deployment_generation",
+          "occurred_at": "2026-08-12T16:00:35.000Z",
+          "severity": "change",
+          "source": "deployment-controller",
+          "threshold": 41,
+          "value": 42
+        }
+      ]
+    },
+    {
+      "sequence": 1,
+      "tool": "autonomy.deployment",
+      "request": {
+        "scenario_id": "autonomy-sensor-fusion"
+      },
+      "response": {
+        "completed_at": "2026-08-12T15:59:40.000Z",
+        "component": "perception-stack",
+        "deployed_version": "perception-2.9.0",
+        "deployment_id": "deploy-perception-0042",
+        "environment": "digital-twin",
+        "previous_version": "perception-2.8.3",
+        "production": false
+      }
+    },
+    {
+      "sequence": 2,
+      "tool": "autonomy.readState",
+      "request": {
+        "scenario_id": "autonomy-sensor-fusion"
+      },
+      "response": {
+        "action_generation": 0,
+        "compute_healthy": true,
+        "fusion_confidence": 0.61,
+        "gps_healthy": true,
+        "inside_safety_corridor": true,
+        "lidar_camera_offset_ms": 146,
+        "map_match_healthy": true,
+        "max_speed_mps": 2.2,
+        "planner_mode": "conservative",
+        "position": {
+          "x": 39,
+          "y": 0.3
+        },
+        "position_covariance_m2": 0.43,
+        "route_progress_ratio": 0.71,
+        "simulation_only": true,
+        "thermal_healthy": true,
+        "tracking_confidence": 0.67,
+        "twin_id": "shuttle-dt-01",
+        "vehicle_mode": "autonomous-simulated"
+      }
+    },
+    {
+      "sequence": 3,
+      "tool": "autonomy.safety",
+      "request": {
+        "scenario_id": "autonomy-sensor-fusion"
+      },
+      "response": {
+        "allowed_actions": [
+          "restart-sensor-fusion-worker",
+          "resynchronize-sensor-timestamps"
+        ],
+        "approval_required_actions": [
+          "switch-degraded-perception-mode",
+          "stop-in-simulated-safe-zone",
+          "rollback-perception-deployment"
+        ],
+        "network_required": false,
+        "physical_vehicle_connected": false,
+        "production_control_connected": false,
+        "production_mission_control_writes": false,
+        "simulation_only": true
+      }
+    },
+    {
+      "sequence": 4,
+      "tool": "autonomy.readState",
+      "request": {
+        "scenario_id": "autonomy-sensor-fusion"
+      },
+      "response": {
+        "action_generation": 0,
+        "compute_healthy": true,
+        "fusion_confidence": 0.61,
+        "gps_healthy": true,
+        "inside_safety_corridor": true,
+        "lidar_camera_offset_ms": 146,
+        "map_match_healthy": true,
+        "max_speed_mps": 2.2,
+        "planner_mode": "conservative",
+        "position": {
+          "x": 39,
+          "y": 0.3
+        },
+        "position_covariance_m2": 0.43,
+        "route_progress_ratio": 0.71,
+        "simulation_only": true,
+        "thermal_healthy": true,
+        "tracking_confidence": 0.67,
+        "twin_id": "shuttle-dt-01",
+        "vehicle_mode": "autonomous-simulated"
+      }
+    }
+  ]
+}

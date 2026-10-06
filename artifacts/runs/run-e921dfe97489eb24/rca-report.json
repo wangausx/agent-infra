@@ -1,0 +1,59 @@
+{
+  "selected_cause": "lidar-camera-timestamp-skew",
+  "hypotheses": [
+    {
+      "cause": "lidar-camera-timestamp-skew",
+      "supporting": [
+        "sensor-timestamp-drift",
+        "fusion-confidence-low",
+        "deployment-event"
+      ],
+      "disconfirming": [
+        "gps-healthy",
+        "compute-healthy"
+      ],
+      "supporting_evidence": [
+        "sensor-timestamp-drift",
+        "fusion-confidence-low",
+        "deployment-event"
+      ],
+      "disconfirming_evidence": [],
+      "score": 3
+    },
+    {
+      "cause": "compute-thermal-degradation",
+      "supporting": [
+        "fusion-confidence-low"
+      ],
+      "disconfirming": [
+        "compute-healthy",
+        "thermal-healthy"
+      ],
+      "supporting_evidence": [
+        "fusion-confidence-low"
+      ],
+      "disconfirming_evidence": [],
+      "score": 1
+    },
+    {
+      "cause": "localization-map-corruption",
+      "supporting": [
+        "localization-covariance-high",
+        "route-progress-low"
+      ],
+      "disconfirming": [
+        "map-match-healthy",
+        "sensor-timestamp-drift"
+      ],
+      "supporting_evidence": [
+        "localization-covariance-high",
+        "route-progress-low"
+      ],
+      "disconfirming_evidence": [
+        "sensor-timestamp-drift"
+      ],
+      "score": 1
+    }
+  ],
+  "evidence_complete": true
+}

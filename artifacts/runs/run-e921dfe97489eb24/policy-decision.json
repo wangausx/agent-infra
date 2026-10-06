@@ -1,0 +1,7 @@
+{
+  "action": "resynchronize-sensor-timestamps",
+  "risk": "low",
+  "approval_required": false,
+  "allowed": true,
+  "reason": "allowlisted digital-twin recovery"
+}

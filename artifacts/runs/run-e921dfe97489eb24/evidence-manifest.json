@@ -1,0 +1,81 @@
+{
+  "schema": "agent-infra/evidence-manifest/v2",
+  "run_id": "run-e921dfe97489eb24",
+  "correlation_id": "corr-fce735fdcd72b357",
+  "seed": "autonomy-sensor-fusion-001",
+  "observed_at": "2026-08-12T16:00:00.000Z",
+  "team_id": "team-c430095640f03820",
+  "room_id": "room-e9e76f6bfe84522d",
+  "project_id": "project-da5d950170c1c8a4",
+  "task_id": "task-4938001ef6bf9558",
+  "files": [
+    "scorecard.json",
+    "incident.json",
+    "suppression-evidence.jsonl",
+    "rca-report.json",
+    "policy-decision.json",
+    "action-result.json",
+    "verifier-report.json",
+    "postmortem.md",
+    "trace.jsonl",
+    "intervention-ledger.jsonl",
+    "mission-control-snapshot.json",
+    "evidence-manifest.json",
+    "metrics.json",
+    "replay-recording.json",
+    "disclosure.json"
+  ],
+  "identities": [
+    "Danny",
+    "Morgan",
+    "Rex",
+    "Dr. Sage",
+    "Juno"
+  ],
+  "safety": {
+    "schema": "agent-infra/zero-touch-scorecard/v1",
+    "run_id": "run-e921dfe97489eb24",
+    "scenario": "autonomy-sensor-fusion",
+    "verdict": "PASS",
+    "stages": [
+      "ALERTS",
+      "INCIDENT",
+      "RCA",
+      "POLICY",
+      "ACTION",
+      "VERIFY",
+      "REVIEW"
+    ],
+    "roles": [
+      "Danny",
+      "Morgan",
+      "Rex",
+      "Dr. Sage",
+      "Juno"
+    ],
+    "production_writes": false,
+    "physical_vehicle_used": false,
+    "measurable_value": {
+      "raw_alerts": 12,
+      "suppressed_alerts": 4,
+      "incidents": 1,
+      "action": "resynchronize-sensor-timestamps"
+    }
+  },
+  "sha256": {
+    "scorecard.json": "fb44d7a9f84ae550111a39fccf0bfb863800f8f713d9da7b8d2001af8fcf18aa",
+    "incident.json": "e0d2e4f28e96e1b8b7927d6c76c310341e7c1d995f58c687048438b5ccf8d123",
+    "suppression-evidence.jsonl": "b557fbd4f819fba17400f516121a43e437dacaed0e441c2c498c9c8fce46b818",
+    "rca-report.json": "6d547700360b0b010164be0eb1d9830e2b9caf88d572aa41d170234b22e8a37c",
+    "policy-decision.json": "b772c9dd5557c5a15d595c5e52d3b14bcb794a5e693dd2cf2104e53b14512f23",
+    "action-result.json": "9432cb0dce9f1391dcbe698012c82e41cdf4c03bfda594e2d3eda2f5d0109fef",
+    "verifier-report.json": "181d899cf34947f22204cc754f732d13c008f76395099663cbfa5ad0b03a6d83",
+    "postmortem.md": "e9c5dd86ccfaa361d7fb62fad41a35a8ae03108948722a8a5ed5772ffb2fce95",
+    "trace.jsonl": "3fd74f26794f96a694514d234d0fe88ad216e8fa38da737f6e3eb63450846028",
+    "intervention-ledger.jsonl": "9d9d70b7b9c3ba212801ddbd074b8f336083815bd967fc016ca2a20d932d0ce2",
+    "mission-control-snapshot.json": "75b11aa9a8ca999d790ce8911ee06a1d0b1480dec6ad0b509df407672b0b80ae",
+    "metrics.json": "08956fd44b3bfa66d024d269f02db4b0a07fd247b33a64b0f2a275e836bb457f",
+    "replay-recording.json": "580d7ae602f1631a4e5973f6245d9055d211426187fe7c2966b40c075282c366",
+    "disclosure.json": "a5a1cf1396f53dc5939e037acc4ab0186364c38d3bda7cb1f57740ea3c4864cc"
+  }
+}

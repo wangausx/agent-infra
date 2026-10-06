@@ -1,0 +1,36 @@
+{
+  "schema": "agent-infra/dataset-snapshot/v1",
+  "snapshot_id": "snapshot-0f42276707afd6e0",
+  "created_at": null,
+  "split_method": "temporal-grouped-by-domain-with-lineage-isolation",
+  "sample": {
+    "episodes": 1,
+    "train": 1,
+    "validation": 0,
+    "test": 0
+  },
+  "training_sample": {
+    "eligible_episodes": 0,
+    "train": 0,
+    "validation": 0,
+    "test": 0
+  },
+  "lineage": {
+    "episode_ids": [
+      "run-e921dfe97489eb24"
+    ],
+    "run_ids": [
+      "run-e921dfe97489eb24"
+    ]
+  },
+  "safety": {
+    "production_write_episodes": 0,
+    "replay_integrity": "passed"
+  },
+  "training_splits": {
+    "train": [],
+    "validation": [],
+    "test": []
+  },
+  "content_sha256": "0f42276707afd6e032d56bea65f053666b7adc16adc9e6ed952894eeadeeb4d6"
+}

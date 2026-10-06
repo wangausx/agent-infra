@@ -20,6 +20,7 @@ __pycache__/
 
 # Runtime state and generated outputs
 .runtime/
+.mc-execution-task-*.json
 state/runtime/
 runs/
 artifacts/generated/

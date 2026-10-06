@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Infra Architecture</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.5; }
+    body { max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #172033; background: #fff; }
+    header { border-bottom: 2px solid #dbe4f0; margin-bottom: 1.5rem; }
+    h1 { margin-bottom: .25rem; }
+    .notice { padding: 1rem; border-left: 4px solid #3478c9; background: #f2f7fc; }
+    .flow { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin: 1.5rem 0; }
+    .stage { border: 1px solid #cbd7e6; border-radius: .5rem; padding: 1rem; background: #fafcff; }
+    .stage strong { display: block; color: #1f5f9f; margin-bottom: .35rem; }
+    footer { margin-top: 2rem; color: #53657a; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Agent Infra Architecture</h1>
+    <p>Public overview of the governed collaboration runtime.</p>
+  </header>
+  <p class="notice"><strong>Safety boundary:</strong> the public runtime defaults to dry-run operation, requires explicit approval for side effects, and records evidence for independent verification.</p>
+  <section aria-labelledby="flow-heading">
+    <h2 id="flow-heading">Evidence-backed lifecycle</h2>
+    <div class="flow">
+      <div class="stage"><strong>1. Plan</strong>Normalize the request and declare the acceptance contract.</div>
+      <div class="stage"><strong>2. Execute</strong>Run bounded, allowlisted work with durable progress evidence.</div>
+      <div class="stage"><strong>3. Verify</strong>Check observed state independently of executor claims.</div>
+      <div class="stage"><strong>4. Review</strong>Retain the evidence bundle and record the final outcome.</div>
+    </div>
+  </section>
+  <h2>Design principles</h2>
+  <ul>
+    <li>Fail closed on malformed input, unsafe actions, and missing evidence.</li>
+    <li>Keep domain-agent responsibilities separate from infrastructure operations.</li>
+    <li>Make retries, restart adoption, and rollback observable and idempotent.</li>
+    <li>Keep production writes disabled unless explicitly authorized.</li>
+  </ul>
+  <footer>Agent Infra public release documentation.</footer>
+</body>
+</html>

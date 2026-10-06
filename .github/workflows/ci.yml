@@ -22,5 +22,5 @@ jobs:
       - run: npm run zero-touch:validate
       - run: npm run zero-touch:replay
       - run: npm run zero-touch:evaluate
-      - run: npm run package:check
       - run: npm run package
+      - run: npm run package:check

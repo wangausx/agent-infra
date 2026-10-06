@@ -13,7 +13,7 @@ const runs = fs.readdirSync(runRoot, { withFileTypes: true }).filter((entry) => 
 const runId = runs.at(-1); if (!runId) throw new Error('no run artifact generated');
 const source = path.join(runRoot, runId); const packageDir = path.join(root, 'artifacts', 'packages', `m5-${runId}`);
 fs.rmSync(packageDir, { recursive: true, force: true }); fs.mkdirSync(packageDir, { recursive: true });
-const copies = ['package.json', 'package-lock.json', '.env.example', '.github', 'README.md', 'scripts', 'src', 'evals', 'adapters', 'agents', 'skills', 'tools', 'contracts', 'docs', 'deploy', 'scenarios', 'artifacts/trustops-solution-architecture.html'];
+const copies = ['package.json', 'package-lock.json', '.env.example', '.github', 'README.md', 'ARCHITECTURE.md', 'scripts', 'src', 'evals', 'adapters', 'agents', 'skills', 'tools', 'contracts', 'docs', 'deploy', 'scenarios', 'artifacts/trustops-solution-architecture.html'];
 for (const file of copies) { const from = path.join(root, file); if (!fs.existsSync(from)) continue; const target = path.join(packageDir, file); fs.mkdirSync(path.dirname(target), { recursive: true }); fs.cpSync(from, target, { recursive: true }); }
 const packagedRunDir = path.join(packageDir, 'artifacts', 'runs', runId);
 fs.mkdirSync(packagedRunDir, { recursive: true });

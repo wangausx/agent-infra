@@ -1,0 +1,7 @@
+{
+  "unavailable_tests": [
+    "official AgentTeams live transport",
+    "production Mission Control writes"
+  ],
+  "reason": "M4 acceptance is offline and production-safe"
+}

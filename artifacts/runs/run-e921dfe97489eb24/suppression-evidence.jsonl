@@ -1,0 +1,4 @@
+{"alert_id":"alert-007","reason":"declared-duplicate","duplicate_of":"alert-002","source":"fusion-worker-b"}
+{"alert_id":"alert-008","reason":"declared-duplicate","duplicate_of":"alert-002","source":"fusion-worker-c"}
+{"alert_id":"alert-009","reason":"declared-duplicate","duplicate_of":"alert-003","source":"localization-ekf"}
+{"alert_id":"alert-010","reason":"declared-duplicate","duplicate_of":"alert-004","source":"object-tracker"}

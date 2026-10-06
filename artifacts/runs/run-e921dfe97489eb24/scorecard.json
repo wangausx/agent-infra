@@ -1,0 +1,30 @@
+{
+  "schema": "agent-infra/zero-touch-scorecard/v1",
+  "run_id": "run-e921dfe97489eb24",
+  "scenario": "autonomy-sensor-fusion",
+  "verdict": "PASS",
+  "stages": [
+    "ALERTS",
+    "INCIDENT",
+    "RCA",
+    "POLICY",
+    "ACTION",
+    "VERIFY",
+    "REVIEW"
+  ],
+  "roles": [
+    "Danny",
+    "Morgan",
+    "Rex",
+    "Dr. Sage",
+    "Juno"
+  ],
+  "production_writes": false,
+  "physical_vehicle_used": false,
+  "measurable_value": {
+    "raw_alerts": 12,
+    "suppressed_alerts": 4,
+    "incidents": 1,
+    "action": "resynchronize-sensor-timestamps"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "incident-alert-001-alert-002-alert-003-alert-004-alert-005-alert-006-alert-011-alert-012",
+  "count": 1,
+  "alert_ids": [
+    "alert-001",
+    "alert-002",
+    "alert-003",
+    "alert-004",
+    "alert-005",
+    "alert-006",
+    "alert-011",
+    "alert-012"
+  ],
+  "suppressed_alert_ids": [
+    "alert-007",
+    "alert-008",
+    "alert-009",
+    "alert-010"
+  ],
+  "deployment_event": "alert-012"
+}
